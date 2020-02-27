@@ -3,7 +3,7 @@ FROM ubuntu:latest
 RUN apt-get update
 
 # Install other dependencies
-RUN apt-get install -y wget curl python3 python3-pip wget libboost-python-dev\
+RUN apt-get install -y wget curl python3 python3-pip wget libboost-python-dev \
 libboost-dev build-essential zlib1g-dev libboost-system-dev libboost-program-options-dev
 
 # Install CMAKE
