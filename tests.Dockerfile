@@ -20,3 +20,5 @@ COPY . /seq-learning
 
 RUN cmake -DCMAKE_TYPE=Release Release
 RUN cmake --build Release
+
+CMD ["python", "-m", "unittest", "tests.py"]
