@@ -10,7 +10,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
+    - name: Build the Docker image and run tests 
       run: docker build . --file tests.Dockerfile --tag tests:$(date +%s)
-    - name: Run tests
-      run: docker run tests
+    
