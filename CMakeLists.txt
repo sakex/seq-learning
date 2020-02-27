@@ -10,7 +10,7 @@ include_directories(${Python3_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
 # CREATE LIB
-add_library(sequential_learning SHARED hello.cpp)
+add_library(sequential_learning SHARED src/bindings.cpp)
 
 # LINK
 target_link_libraries(sequential_learning ${Boost_LIBRARIES} ${Python3_LIBRARIES})

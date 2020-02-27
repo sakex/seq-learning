@@ -1,9 +1,12 @@
 #include <boost/python.hpp>
-// Include the headers of MyLib
 
-BOOST_PYTHON_MODULE(pyMyLib)
+char const* greet()
 {
-    Py_Initialize();
+    return "hello, world";
+}
 
-    // Write the bindings here
+BOOST_PYTHON_MODULE(sequential_learning)
+{
+    using namespace boost::python;
+    def("greet", greet);
 }
