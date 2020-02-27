@@ -15,10 +15,14 @@ RUN make -j$(nproc)
 RUN make install
 RUN update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
 
-WORKDIR /seq-learning
-COPY . /seq-learning
+WORKDIR /seq-learning/
+COPY . /seq-learning/
 
-RUN cmake -DCMAKE_TYPE=Release Release
-RUN cmake --build Release
+WORKDIR /seq-learning/Debug/
+RUN rm -rf *
+RUN cmake ..
+RUN cmake --build .
 
-CMD ["python", "-m", "unittest", "tests.py"]
+WORKDIR /seq-learning/
+
+CMD ["python3", "-m", "unittest", "tests.py"]
