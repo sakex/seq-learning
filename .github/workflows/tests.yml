@@ -10,6 +10,11 @@ jobs:
 
     steps:
     - uses: whoan/docker-build-with-cache-action@v4
+      with:
+          image_tag: latest
+          context: .
+          dockerfile: tests.Dockerfile
+          push_image_and_stages: true
+          push_git_tag: false
+          pull_image_and_stages: true
     - name: Build the Docker image and run tests 
-      run: docker build . --file tests.Dockerfile --tag tests:$(date +%s)
-    
