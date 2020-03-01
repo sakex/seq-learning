@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Build the Docker image and run tests 
     - uses: whoan/docker-build-with-cache-action@v4
       with:
           image_tag: latest
