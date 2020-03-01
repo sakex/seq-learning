@@ -1,7 +1,6 @@
 #include <boost/python.hpp>
 
-char const* greet()
-{
+char const* greet() {
     return "hello, world";
 }
 
