@@ -4,16 +4,16 @@
 
 ### In R:
 
-  install.packages("devtools") # Build tools for Cpp extensions
+    install.packages("devtools") # Build tools for Cpp extensions
   
 ### You might be missing some dependencies, I personnaly had to run:
 
-  sudo apt install libxml2-dev libcurl4-openssl-dev # I had played with openSSL and changed my installation in the past
+    sudo apt install libxml2-dev libcurl4-openssl-dev # I had played with openSSL and changed my installation in the past
   
 ### Back to R:
 
-  install.packages("RcppArmadillo") # Armadillo R bindings
-  install.packages("lhs") # Dependency
-  install.packages("numDeriv") # Other dependency
+    install.packages("RcppArmadillo") # Armadillo R bindings
+    install.packages("lhs") # Dependency
+    install.packages("numDeriv") # Other dependency
   
 ### The easiest way to build the package is to use RStudio and run the tests
