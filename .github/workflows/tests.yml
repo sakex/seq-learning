@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: whoan/docker-build-with-cache-action@v4
     - name: Build the Docker image and run tests 
       run: docker build . --file tests.Dockerfile --tag tests:$(date +%s)
     
