@@ -17,3 +17,13 @@
     install.packages("numDeriv") # Other dependency
   
 ### The easiest way to build the package is to use RStudio and run the tests
+
+#### Then you can use the IDE of your choice and run:
+
+    devtools::test()
+
+## Performance
+
+It takes `~10min` to run `tests/testthat/test_C_est.R`, it clearly doesn't use all threads, so there might be some optimization there
+
+<img src="https://github.com/sakex/seq-learning/blob/master/images/cpu_activity.png?raw=true" />
