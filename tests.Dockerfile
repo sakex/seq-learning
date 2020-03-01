@@ -24,4 +24,4 @@ RUN cmake --build .
 
 WORKDIR /seq-learning/
 
-RUN python3 -m unittest tests.py
+CMD ["python3", "-m", "unittest", "tests.py"]
