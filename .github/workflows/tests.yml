@@ -17,3 +17,4 @@ jobs:
           push_image_and_stages: true
           push_git_tag: false
           pull_image_and_stages: true
+          image_name: sakex/seq-learning/tests
