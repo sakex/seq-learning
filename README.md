@@ -16,11 +16,9 @@
     install.packages("lhs") # Dependency
     install.packages("numDeriv") # Other dependency
   
-### The easiest way to build the package is to use RStudio and run the tests
+### Install
 
-#### Then you can use the IDE of your choice and run:
-
-    devtools::test()
+    R CMD INSTALL activegp_1.0.3.tar.gz
 
 ## Performance
 
