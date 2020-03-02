@@ -1,5 +1,6 @@
 import unittest
 import Debug.sequential_learning as sq
+import numpy as np
 
 
 class ImportTest(unittest.TestCase):

@@ -17,6 +17,8 @@ RUN update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --
 WORKDIR /seq-learning/
 COPY . /seq-learning/
 
+RUN pip install -r requirements.txt
+
 WORKDIR /seq-learning/Debug/
 RUN rm -rf *
 RUN cmake ..
