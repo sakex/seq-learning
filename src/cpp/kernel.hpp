@@ -5,6 +5,8 @@
 #ifndef SEQ_LEARNING_KERNEL_HPP
 #define SEQ_LEARNING_KERNEL_HPP
 
+#include <boost/python/numpy.hpp>
+
 class Kernel {
 
 };
