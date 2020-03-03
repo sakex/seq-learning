@@ -7,36 +7,25 @@
 
 #include "gaussian_process.hpp"
 #include "cov_types.hpp"
-#include <boost/numpy.hpp>
+#include <boost/python/numpy.hpp>
 
 namespace activegp {
-    namespace np = boost::numpy;
+    namespace np = boost::python::numpy;
 
-    template<cov_types cov_type>
-    class PythonLoader : public GP<cov_type> {
-    public:
-        PythonLoader(np::ndarray const &design, np::ndarray const &response) {
-            Py_intptr_t const * shape = design.get_strides();
-            n = shape[0];
-            n_var = shape[1];
-            load(design, response);
-        }
-
-    private:
+    struct PythonLoader {
         uint16_t n;
         uint16_t n_var;
-        void load(np::ndarray const &design, np::ndarray const &response) {}
-    };
+        np::ndarray const &design;
+        np::ndarray const &response;
+        np::ndarray const &theta;
 
-    template<>
-    void PythonLoader<cov_types::gaussian>::load(const boost::numpy::ndarray &design,
-                                                 const boost::numpy::ndarray &response) {
-        for(uint16_t i = 0; i < n_var; ++i) {
-            for(uint16_t j = i; j < n_var; ++j) {
-
-            }
+        PythonLoader(np::ndarray const &_design, np::ndarray const &_response, np::ndarray const &_theta) :
+                design(_design), response(_response), theta(_theta) {
+            Py_intptr_t const *shape = design.get_strides();
+            n = shape[0];
+            n_var = shape[1];
         }
-    }
+    };
 }
 
 #endif //SEQ_LEARNING_PYTHON_LOADER_HPP

@@ -18,7 +18,7 @@ def eigenspace_consistence():
     kernel = DotProduct() + WhiteKernel()
     gpr = GaussianProcessRegressor(kernel=kernel, random_state=0).fit(x, y)
     theta = gpr.kernel_.theta
-    print(sl.C_gp(x, y))
+    print(sl.C_gp(x, y, theta))
 
 
 if __name__ == "__main__":
