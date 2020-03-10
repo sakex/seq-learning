@@ -8,9 +8,18 @@
 #include "cov_types.hpp"
 #include <armadillo>
 #include <boost/hana.hpp>
+#include <cstddef>
+using namespace std::literals;
+
 
 
 namespace activegp {
+    template<typename T>
+    concept bool EqualityComparable = requires(T a, T b) {
+        { a == b } -> bool;
+    };
+
+
     template<cov_types cov_type>
     class GP {
     public:

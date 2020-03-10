@@ -1,5 +1,31 @@
 # seq-learning
 
+# Install
+
+    git clone https://github.com/sakex/seq-learning.git
+    
+**Or use SSH:**
+
+    git@github.com:sakex/seq-learning.git
+    
+**Install dependencies**
+
+    pip3 install -r requirements.txt
+    
+    sudo apt-get install -y wget curl python3 python3-pip wget \
+         libboost-python-dev libboost-dev build-essential zlib1g-dev \
+         libboost-system-dev libboost-program-options-dev libarmadillo-dev libboost-numpy-dev
+         
+# Build
+
+    mkdir Debug
+    cmake . Debug
+    cmake --build Debug
+    
+# Run
+
+    python3 examples/egeinspace.py
+
 # Build original R package (Linux)
 
 ### In R:

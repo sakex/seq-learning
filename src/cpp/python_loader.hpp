@@ -24,6 +24,7 @@ namespace activegp {
             Py_intptr_t const *shape = design.get_strides();
             n = shape[0];
             n_var = shape[1];
+            std::cout << n << " " << n_var << std::endl;
         }
     };
 }

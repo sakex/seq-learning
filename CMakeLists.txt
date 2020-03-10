@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 project(seq_learning VERSION 0.1)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Wl,--no-undefined -D__DEBUG__=1")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -fconcepts -g -Wl,--no-undefined -D__DEBUG__=1")
 
 
 # FIND PYTHON, ARMADILLO AND BOOST

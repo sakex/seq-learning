@@ -13,7 +13,7 @@ np::ndarray c_gp(np::ndarray & design, np::ndarray & response, np::ndarray & the
     std::cout << "hi" << std::endl;
 #endif
     activegp::GP<activegp::cov_types::gaussian> gp;
-    activegp::PythonLoader builder(design, response);
+    activegp::PythonLoader builder(design, response, theta);
     gp.load(builder);
     return design;
 }
