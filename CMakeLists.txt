@@ -1,18 +1,27 @@
 cmake_minimum_required(VERSION 3.14)
 project(seq_learning VERSION 0.1)
 
-# FIND PYTHON AND BOOST
+set(CMAKE_CXX_STANDARD 17)
+
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Wl,--no-undefined -D__DEBUG__=1")
+
+
+# FIND PYTHON, ARMADILLO AND BOOST
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-find_package(Boost COMPONENTS python3 REQUIRED)
+find_package(Armadillo REQUIRED)
+find_package(Boost REQUIRED python3 numpy3)
+
 
 # INCLUDE
 include_directories(${Python3_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # CREATE LIB
-add_library(sequential_learning SHARED src/bindings.cpp src/kernel.hpp)
+add_library(sequential_learning SHARED src/bindings.cpp src/cpp/kernel.hpp src/cpp/gaussian_process.hpp src/cpp/cov_types.hpp src/cpp/python_loader.hpp src/cpp/traits/loader.hpp src/cpp/python_loader.cpp)
 
 # LINK
-target_link_libraries(sequential_learning ${Boost_LIBRARIES} ${Python3_LIBRARIES})
+target_link_libraries(sequential_learning ${ARMADILLO_LIBRARIES} ${Boost_LIBRARIES} ${NUMPY_INCLUDE_DIRS} ${Python3_LIBRARIES})
 
 set_target_properties(sequential_learning PROPERTIES PREFIX "")
