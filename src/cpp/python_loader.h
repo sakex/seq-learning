@@ -2,11 +2,11 @@
 // Created by sakex on 03.03.20.
 //
 
-#ifndef SEQ_LEARNING_PYTHON_LOADER_HPP
-#define SEQ_LEARNING_PYTHON_LOADER_HPP
+#ifndef SEQ_LEARNING_PYTHON_LOADER_H
+#define SEQ_LEARNING_PYTHON_LOADER_H
 
-#include "gaussian_process.hpp"
-#include "cov_types.hpp"
+#include "GaussianProcess.hpp"
+#include "types/eCovTypes.h"
 #include <boost/python/numpy.hpp>
 
 namespace activegp {
@@ -23,4 +23,4 @@ namespace activegp {
     };
 }
 
-#endif //SEQ_LEARNING_PYTHON_LOADER_HPP
+#endif //SEQ_LEARNING_PYTHON_LOADER_H

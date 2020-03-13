@@ -4,7 +4,7 @@
 #ifdef __DEBUG__
 #include <iostream>
 #endif
-#include "cpp/python_loader.hpp"
+#include "cpp/python_loader.h"
 
 namespace np = boost::python::numpy;
 
@@ -12,7 +12,9 @@ np::ndarray c_gp(np::ndarray & design, np::ndarray & response, np::ndarray & the
 #ifdef __DEBUG__
     std::cout << "hi" << std::endl;
 #endif
-    activegp::PythonLoader builder(design, response, theta);
+    /*activegp::PythonLoader builder(design, response, theta);
+    activegp::GP<activegp::eCovTypes::gaussian> gp;
+    gp.load(builder);*/
     return design;
 }
 

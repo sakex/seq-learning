@@ -2,7 +2,7 @@
 // Created by sakex on 11.03.20.
 //
 
-#include "python_loader.hpp"
+#include "python_loader.h"
 
 namespace activegp {
     PythonLoader::PythonLoader(np::ndarray const &_design, np::ndarray const &_response, np::ndarray const &_theta) :

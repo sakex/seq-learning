@@ -19,7 +19,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # CREATE LIB
-add_library(sequential_learning SHARED src/bindings.cpp src/cpp/kernel.hpp src/cpp/gaussian_process.hpp src/cpp/cov_types.hpp src/cpp/python_loader.hpp src/cpp/traits/loader.hpp src/cpp/python_loader.cpp)
+add_library(sequential_learning SHARED src/cpp/helpers/constexprSqrt.hpp src/bindings.cpp src/cpp/kernel.hpp src/cpp/GaussianProcess.hpp src/cpp/types/eCovTypes.h src/cpp/python_loader.h src/cpp/python_loader.cpp src/cpp/types/DesignLoader.h)
 
 # LINK
 target_link_libraries(sequential_learning ${ARMADILLO_LIBRARIES} ${Boost_LIBRARIES} ${NUMPY_INCLUDE_DIRS} ${Python3_LIBRARIES})
