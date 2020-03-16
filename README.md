@@ -39,6 +39,7 @@
 ### Back to R:
 
     install.packages("RcppArmadillo") # Armadillo R bindings
+    # Didn't work on GCC-9, I had to pull GCC-7 (missing -lgfortran, whatever that is ;) )
     install.packages("lhs") # Dependency
     install.packages("numDeriv") # Other dependency
   
