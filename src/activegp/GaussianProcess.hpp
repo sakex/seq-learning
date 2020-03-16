@@ -55,8 +55,8 @@ namespace activegp {
                 apb = a + b,
                 erf1 = std::erf(apb / tx2),
                 erf2 = std::erf((apb - 2) / (tx2)),
-                exp = std::exp(bma_squared / (4. * t * t));
-        return (PI_SQRT * t) * exp * (erf1 - erf2);
+                _exp = std::exp(bma_squared / (4. * t * t));
+        return (PI_SQRT * t) * _exp * (erf1 - erf2);
     }
 
     template<>
@@ -74,18 +74,10 @@ namespace activegp {
 
     template<>
     inline double GP<eCovTypes::gaussian>::w_ij(double const a, double const b, double const t) const {
-        // Original was:
-        // return((sqrt(PI)*(erf((b+a)/(2.*t)) - erf((b+a-2)/(2.*t)))*t*exp(-(b-a)*(b-a)/(4.*t*t)))/2.);
-        // Dividing sqrt(pi) by 2 at compile time to not have to divide everything again at runtime
-        constexpr double PI_SQRT = helpers::sqrt(M_PI) / 2.;
-        // Try and get some out of order execution
-        const double bma_squared = -std::pow(b - a, 2),
-                tx2 = t * 2.,
-                apb = a + b,
-                erf1 = std::erf(apb / tx2),
-                erf2 = std::erf((apb - 2) / (tx2)),
-                exp = std::exp(bma_squared / (4. * t * t));
-        return (PI_SQRT * t) * exp * (erf1 - erf2);
+        double a2 = a * a, b2 = b * b, t2 = t * t;
+        return (-((2 * (exp(-(a2 + b2) / (2 * t2)) - exp((-a2 - b2 + 2 * (a + b - 1)) / (2 * t2))) * t +
+                   (a - b) * exp(-(a - b) * (a - b) / (4 * t2)) * sqrt(M_PI) *
+                   (erf((-2 + a + b) / (2 * t)) - erf((a + b) / (2 * t))))) / (4 * t));
     }
 
     template<>
@@ -112,7 +104,7 @@ namespace activegp {
                 wij_temp.at(i, j) = w_ij(loader.design_(i, derivative1), loader.design_(j, derivative1),
                                          theta_(derivative1)) *
                                     w_ij(loader.design_(j, derivative2), loader.design_(i, derivative2),
-                                          theta_(derivative2));
+                                         theta_(derivative2));
                 if (n_var_ > 2) {
                     for (int k = 0; k < n_var_; k++) {
                         if (k != derivative1 && k != derivative2)
@@ -140,19 +132,13 @@ namespace activegp {
             arma::Mat<double> wii_temp = w_kappa_ij(loader, i, i);
             double const theta_squared = std::pow(theta_.at(i), 2);
             arma::Mat<double> m =
-                    (m_num_ / theta_squared) - arma::accu(loader.k_inv_ % wii_temp) + t_kir * (wii_temp * kir);
-            matrix_(i, i) = m(0, 0);
+                    (m_num_ / theta_squared) - arma::accu(loader.k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
+            matrix_.at(i, i) = m.at(0, 0);
             //wij_(i, i) = wij_temp_;
 
             for (uint16_t j = i + 1; j < n_var_; ++j) {
                 arma::Mat<double> wij_temp = w_kappa_ij(loader, i, j);
-
-                std::cout << wij_temp << std::endl;
-                return;
-
-                std::cout << t_kir * (wij_temp * kir) << std::endl;
-                std::cout << -arma::accu(loader.k_inv_ % wij_temp) << std::endl;
-                m = -arma::accu(loader.k_inv_ % wij_temp) + t_kir * (wij_temp * kir);
+                m = -arma::accu(loader.k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
                 double const m_val = m(0, 0);
                 matrix_.at(i, j) = m_val;
                 matrix_.at(j, i) = m_val;
