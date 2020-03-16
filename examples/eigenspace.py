@@ -15,7 +15,6 @@ import sequential_learning as sl
 def test_precomputed():
     from data import design, response, k_inv, theta
     design, response, k_inv, theta = map(lambda item: np.array(item), (design, response, k_inv, theta))
-    print()
     print(sl.C_gp(design, response, theta, k_inv))
 
 

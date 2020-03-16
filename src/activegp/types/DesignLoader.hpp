@@ -12,8 +12,8 @@ namespace activegp {
         uint16_t n_;
         uint16_t n_var_;
         arma::Mat<double> design_;
-        arma::Mat<double> response_;
-        arma::Mat<double> theta_;
+        arma::vec response_;
+        arma::vec theta_;
         arma::Mat<double> k_inv_;
 
         template <typename ...Ts>
