@@ -5,7 +5,7 @@
 #ifndef SEQ_LEARNING_PYTHON_TO_ARMADILLO_HPP
 #define SEQ_LEARNING_PYTHON_TO_ARMADILLO_HPP
 
-#include "activegp/types/DesignLoader.h"
+#include "activegp/types/DesignLoader.hpp"
 #include <armadillo>
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
@@ -14,33 +14,58 @@ namespace np = boost::python::numpy;
 namespace python = boost::python;
 
 namespace python_extractor {
-    inline void py_to_arma(np::ndarray const & numpy_array, arma::Mat<double> & target) {
-        Py_intptr_t const *shape = numpy_array.get_strides();
+    inline void py_to_arma(np::ndarray const &numpy_array, arma::Mat<double> &target) {
+        uint16_t const nd = numpy_array.get_nd();
+        assert(uint16_t(nd - 1) < 2); // if nd == 0 -> nd - 1 = MAX_UINT
+        Py_intptr_t const *shape = numpy_array.get_shape();
         uint16_t const rows = shape[0];
-        uint16_t const columns = shape[1];
+        uint16_t const columns = nd == 2 ? shape[1] : 0;
 
-        target.set_size(rows, columns);
-
-        for(uint16_t i = 0; i < rows; ++i){
-            for(uint16_t j = 0; j < columns; ++j) {
-                double const num = python::extract<double>(numpy_array(i, j));
-                target(i, j) = num;
+        if (columns) {
+            target.set_size(rows, columns);
+            for (uint16_t i = 0; i < rows; ++i) {
+                for (uint16_t j = 0; j < columns; ++j) {
+                    double const num = python::extract<double>(numpy_array[i][j]);
+                    target(i, j) = num;
+                }
             }
+            return;
+        }
+
+        target.set_size(rows);
+        for (uint16_t i = 0; i < rows; ++i) {
+            double const num = python::extract<double>(numpy_array[i]);
+            target(i) = num;
         }
     }
 
-    activegp::DesignLoader extract(np::ndarray &design, np::ndarray &response, np::ndarray &theta) {
-        Py_intptr_t const *shape = design.get_strides();
-        uint16_t const n = shape[0];
-        uint16_t const n_var = shape[1];
-        activegp::DesignLoader loader {n, n_var};
-        py_to_arma(design, loader.design);
-        py_to_arma(response, loader.response);
-        py_to_arma(theta, loader.theta);
-        return loader;
+    inline np::ndarray arma_to_py(arma::Mat<double> const &arma_mat) {
+        uint16_t rows = arma_mat.n_rows;
+        uint16_t columns = arma_mat.n_cols;
+        python::tuple shape = python::make_tuple(rows, columns);
+        np::dtype dtype = np::dtype::get_builtin<double>();
+        np::ndarray output = np::zeros(shape, dtype);
+        for (uint16_t i = 0; i < rows; i++) {
+            for (uint16_t j = 0; j < columns; j++) {
+                output[i][j] = arma_mat.at(i, j);
+            }
+        }
+        return output;
     }
+}
 
-
+template<>
+void activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray>(np::ndarray &design,
+                                                                                               np::ndarray &response,
+                                                                                               np::ndarray &theta,
+                                                                                               np::ndarray &k_inv) {
+    Py_intptr_t const *shape = design.get_shape();
+    n_ = shape[0];
+    n_var_ = shape[1];
+    python_extractor::py_to_arma(design, design_);
+    python_extractor::py_to_arma(response, response_);
+    python_extractor::py_to_arma(theta, theta_);
+    python_extractor::py_to_arma(k_inv, k_inv_);
 }
 
 #endif //SEQ_LEARNING_PYTHON_TO_ARMADILLO_HPP

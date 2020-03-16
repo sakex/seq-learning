@@ -9,7 +9,7 @@
 #include <armadillo>
 #include <cmath>
 #include "helpers/constexprSqrt.hpp"
-#include "types/DesignLoader.h"
+#include "types/DesignLoader.hpp"
 
 namespace activegp {
 
@@ -18,13 +18,20 @@ namespace activegp {
     public:
         GP() = default;
 
-        void load(DesignLoader const &loader);
+        void compute(DesignLoader const &loader);
+
+        arma::Mat<double> const &matrix() {
+            return matrix_;
+        }
 
     private:
-        uint16_t n_var = 0;
-        uint16_t n = 0;
-        arma::Mat<double> __matrix;
-        arma::Mat<double> __wij; // Instantiate once
+        static const double m_num_;
+        uint16_t n_var_ = 0;
+        uint16_t n_ = 0;
+        arma::Mat<double> theta_;
+        arma::Mat<double> matrix_;
+        arma::Mat<double> wij_temp_; // Instantiate once
+        //arma::Mat<arma::Mat<double>> wij_; // copy wij_temp_ here
 
         void w_kappa_ij(DesignLoader const &loader, uint16_t derivative1, uint16_t derivative2);
 
@@ -34,6 +41,9 @@ namespace activegp {
 
         [[nodiscard]] double w_ij(double a, double b, double t) const;
     };
+
+    template<>
+    const double GP<eCovTypes::gaussian>::m_num_ = 1;
 
     template<>
     inline double GP<eCovTypes::gaussian>::ikk(double const a, double const b, double const t) const {
@@ -85,50 +95,65 @@ namespace activegp {
     GP<eCovTypes::gaussian>::w_kappa_ij(DesignLoader const &loader, uint16_t const derivative1,
                                         uint16_t const derivative2) {
         if (derivative1 == derivative2) {
-            for (int i = 0; i < n; i++) {
-                for (int j = i; j < n; j++) {
-                    __wij.at(i, j) = w_ii(loader.design(i, derivative1), loader.design(j, derivative1),
-                                          loader.theta(derivative1));
-                    for (int k = 0; k < n_var; k++) {
+            for (int i = 0; i < n_; i++) {
+                for (int j = i; j < n_; j++) {
+                    wij_temp_.at(i, j) = w_ii(loader.design_(i, derivative1), loader.design_(j, derivative1),
+                                              theta_(derivative1));
+                    for (int k = 0; k < n_var_; k++) {
                         if (k != derivative1)
-                            __wij(i, j) *= ikk(loader.design(i, k), loader.design(j, k), loader.theta(k));
+                            wij_temp_.at(i, j) *= ikk(loader.design_(i, k), loader.design_(j, k), theta_(k));
                     }
-                    __wij.at(j, i) = __wij.at(i, j);
+                    wij_temp_.at(j, i) = wij_temp_.at(i, j);
                 }
             }
             return;
         }
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                __wij(i, j) = w_ij(loader.design(i, derivative1), loader.design(j, derivative1),
-                                   loader.theta(derivative1)) *
-                              w_ij(loader.design(j, derivative2), loader.design(i, derivative2),
-                                   loader.theta(derivative2));
-                if (n_var > 2) {
-                    for (int k = 0; k < n_var; k++) {
+        for (int i = 0; i < n_; i++) {
+            for (int j = 0; j < n_; j++) {
+                wij_temp_.at(i, j) = w_ij(loader.design_(i, derivative1), loader.design_(j, derivative1),
+                                          theta_(derivative1)) *
+                                     w_ij(loader.design_(j, derivative2), loader.design_(i, derivative2),
+                                          theta_(derivative2));
+                if (n_var_ > 2) {
+                    for (int k = 0; k < n_var_; k++) {
                         if (k != derivative1 && k != derivative2)
-                            __wij(i, j) *= ikk(loader.design(i, k), loader.design(j, k), loader.theta(k));
+                            wij_temp_.at(i, j) *= ikk(loader.design_(i, k), loader.design_(j, k), theta_(k));
                     }
                 }
             }
         }
     }
 
-    template<>
-    inline void GP<eCovTypes::gaussian>::load(DesignLoader const &loader) {
-        n_var = loader.n_var;
-        n = loader.n;
+    template<eCovTypes cov_type>
+    inline void GP<cov_type>::compute(DesignLoader const &loader) {
+        n_var_ = loader.n_var_;
+        n_ = loader.n_;
 
-        __matrix.resize(n_var, n_var);
-        __wij.resize(n, n);
+        matrix_.resize(n_var_, n_var_);
+        //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
+        wij_temp_.resize(n_, n_);
 
-        for (uint16_t i = 0; i < n_var; ++i) {
-            for (uint16_t j = i; j < n_var; ++j) {
+        theta_ = arma::sqrt(loader.theta_ / 2.);
+
+        arma::Mat<double> kir = arma::trans(loader.k_inv_) * loader.response_; // Cross product
+        arma::Mat<double> t_kir = arma::trans(kir);
+        for (uint16_t i = 0; i < n_var_; ++i) {
+            // Unrolling their loop
+            w_kappa_ij(loader, i, i);
+            arma::Mat<double> m = -arma::accu(loader.k_inv_ % wij_temp_) + t_kir * (wij_temp_ * kir);
+            matrix_(i, i) = m(0, 0);
+            //wij_(i, i) = wij_temp_;
+            double const theta_squared = std::pow(theta_.at(i), 2);
+            for (uint16_t j = i + 1; j < n_var_; ++j) {
                 w_kappa_ij(loader, i, j);
+                m = (m_num_ / theta_squared) - arma::accu(loader.k_inv_ % wij_temp_) + t_kir * (wij_temp_ * kir);
+                double const m_val = m(0, 0);
+                matrix_.at(i, j) = m_val;
+                matrix_.at(j, i) = m_val;
+                //wij_(i, j) = wij_temp_;
             }
         }
     }
-
 
 
 #endif //SEQ_LEARNING_GAUSSIAN_PROCESS_HPP

@@ -10,16 +10,16 @@
 namespace helpers {
     // taken from https://stackoverflow.com/a/34134071
 
-    double constexpr sqrt_newton_raphson(double x, double curr, double prev) {
+    long double constexpr sqrt_newton_raphson(long double x, long double curr, long double prev) {
         return curr == prev
                ? curr
                : sqrt_newton_raphson(x, 0.5 * (curr + x / curr), curr);
     }
 
-    double constexpr sqrt(double x) {
-        return x >= 0 && x < std::numeric_limits<double>::infinity()
+    long double constexpr sqrt(long double x) {
+        return x >= 0 && x < std::numeric_limits<long double>::infinity()
                ? sqrt_newton_raphson(x, x, 0)
-               : std::numeric_limits<double>::quiet_NaN();
+               : std::numeric_limits<long double>::quiet_NaN();
     }
 }
 
