@@ -1,7 +1,5 @@
 import numpy as np
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF
-from scipy.spatial.distance import cdist
+import GPy
 
 DEBUG = True  # Uncomment this line for debug purposes
 
@@ -18,10 +16,12 @@ def subspace_dist(A, B):
 
 
 def test_precomputed():
-    from data import design, response, k_inv, theta
-    design, response, k_inv, theta = map(lambda item: np.array(item), (design, response, k_inv, theta))
+    from data import design, response, kinv, theta
+    response, theta = map(lambda item: np.array(item), (response, theta))
+    kinv = np.array(kinv).reshape(400, 400)
+    design = np.array(design).reshape(-1, 2, order="F")
     true_sub = np.array((1, 1)) / np.sqrt(2)
-    mat = sl.C_gp(design, response, theta, k_inv)
+    mat = sl.C_gp(design, response, theta, kinv)
     sub_est = np.linalg.eig(mat)[1][:, 0]
     assert subspace_dist(sub_est.reshape(1, 2), true_sub.reshape(1, 2)) < 1e-5
 
@@ -39,26 +39,47 @@ def eigenspace_consistence():
 
     response = np.apply_along_axis(func, 1, design)
 
-    kernel = RBF(length_scale=(1, 1))
-    # The only way to use this is to look at their code, no explaination anywhere in the docs
-    # Spent hours on this
+    kernel = GPy.kern.RBF(input_dim=2, ARD=True)
 
-    gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10,
-                                   alpha=.2,
-                                   optimizer="fmin_l_bfgs_b").fit(design, response)
-    gpr.predict(test, return_std=True)
-    # Here again, I need to run predict to have _K_inv
-    # How do I know ? sklearn/gaussian_process/_gpr.py lines 344-351
-    theta = gpr.kernel_.get_params()["length_scale"]
-    k_inv = gpr._K_inv
+    model = GPy.models.GPRegression(design, response, kernel)
+    model.optimize(messages=True, max_f_eval=1000)
+
+    theta = kernel.lengthscale
+
+    k_inv = kernel.K
     mat = sl.C_gp(design, response, theta, k_inv)
+    print(mat)
     true_sub = np.array((1, 1)) / np.sqrt(2)
     sub_est = np.linalg.eig(mat)[1][:, 0]
     dist = subspace_dist(sub_est.reshape(1, 2), true_sub.reshape(1, 2))
-    print(dist)
     assert dist < 1e-5
 
 
+def c_consistence():
+    n = 400
+    n_var = 2
+    real_c = np.full((2, 2), 1 / 8 * (3 + 2 * np.cos(2) - np.cos(4)))
+    design = np.random.uniform(size=n * n_var).reshape(-1, 2)
+    response = np.apply_along_axis(lambda x: np.sin(np.sum(x)), 1, design)
+
+    kernel = GPy.kern.RBF(input_dim=2, ARD=True)
+
+    model = GPy.models.GPRegression(design, response.reshape(-1, 1), kernel)
+    model.optimize(messages=True, max_f_eval=1000)
+
+    theta = kernel.lengthscale
+
+    test = np.random.uniform(size=n * n_var).reshape(-1, 2)
+    test_response = np.apply_along_axis(lambda x: np.sin(np.sum(x)), 1, test)
+
+    k_inv = np.linalg.inv(model.kern.K(model.X))
+    print(k_inv)
+    mat = sl.C_gp(design, response, theta, k_inv)
+    norm = np.linalg.norm(mat - real_c)
+    print(mat)
+
+
 if __name__ == "__main__":
-    test_precomputed()
-    eigenspace_consistence()
+    c_consistence()
+    # test_precomputed()
+    # eigenspace_consistence()
