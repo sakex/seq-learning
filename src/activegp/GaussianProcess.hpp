@@ -40,6 +40,8 @@ namespace activegp {
         [[nodiscard]] double w_ij(double a, double b, double t) const;
     };
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // GAUSSIAN SPCECIALISATION
     template<>
     const double GP<eCovTypes::gaussian>::m_num_ = 1;
 
@@ -80,9 +82,98 @@ namespace activegp {
                    (erf((-2 + a + b) / (2 * t)) - erf((a + b) / (2 * t))))) / (4 * t));
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // MATTERN3_2 SPECIALISATION
+
     template<>
+    const double GP<eCovTypes::mattern_3_2>::m_num_ = 3;
+
+    template<>
+    inline double GP<eCovTypes::mattern_3_2>::ikk(double a, double b, double const t) const {
+        if (b > a) std::swap(a, b);
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        return ((-6 * std::sqrt(3) * a * b * t - 9 * a * t2 - 9 * b * t2 -
+                 5 * std::sqrt(3) * t3) / (12. * exp((std::sqrt(3) * (a + b)) / t) * t2) +
+                (std::exp((std::sqrt(3) * (-2 + a + b)) / t) * (-6 * std::sqrt(3) * t + 6 * std::sqrt(3) * a * t +
+                                                                6 * std::sqrt(3) * b * t -
+                                                                6 * std::sqrt(3) * a * b * t - 18 * t2 + 9 * a * t2 +
+                                                                9 * b * t2 - 5 * std::sqrt(3) * t3)) / (12. * t2) +
+                (std::exp((std::sqrt(3) * (-a + b)) / t) * (6 * a2 * a - 18 * a2 * b +
+                                                            18 * a * b2 - 6 * b2 * b + 12 * std::sqrt(3) * a2 * t -
+                                                            24 * std::sqrt(3) * a * b * t
+                                                            + 12 * std::sqrt(3) * b2 * t + 21 * a * t2 - 21 * b * t2 +
+                                                            5 * std::sqrt(3) * t3)) / (12. * t2) +
+                (std::exp((2 * std::sqrt(3) * b) / t -
+                          (std::sqrt(3) * (a + b)) / t) * (9 * a * t2 - 9 * b * t2 +
+                                                           5 * std::sqrt(3) * t3)) / (12. * t2));
+    }
+
+    template<>
+    inline double GP<eCovTypes::mattern_3_2>::w_ii(double a, double b, double const t) const {
+        if (b > a) std::swap(a, b);
+        double a2 = a * a, b2 = b * b, t2 = t * t;
+        return ((-6 * std::sqrt(3) * a * b * t - 3 * a * t2 - 3 * b * t2 - std::sqrt(3) * t2 * t) /
+                (4. * std::exp((std::sqrt(3) * (a + b)) / t) * t2 * t2) + (std::exp((std::sqrt(3) * (-2 + a + b)) / t) *
+                                                                           (-6 * std::sqrt(3) * t +
+                                                                            6 * std::sqrt(3) * a * t +
+                                                                            6 * std::sqrt(3) * b * t -
+                                                                            6 * std::sqrt(3) * a * b * t -
+                                                                            6 * t2 + 3 * a * t2 + 3 * b * t2 -
+                                                                            std::sqrt(3) * t2 * t)) / (4. * t2 * t2) +
+                (std::exp((2 * std::sqrt(3) * b) / t - (std::sqrt(3) * (a + b)) / t) *
+                 (3 * a * t2 - 3 * b * t2 + std::sqrt(3) * t2 * t)) /
+                (4. * t2 * t2) + (std::exp((std::sqrt(3) * (-a + b)) / t) *
+                                  (-6 * a2 * a + 18 * a2 * b - 18 * a * b2 + 6 * b2 * b + 3 * a * t2 - 3 * b * t2 +
+                                   std::sqrt(3) * t2 * t)) / (4. * t2 * t2));
+
+    }
+
+    template<>
+    inline double GP<eCovTypes::mattern_3_2>::w_ij(double const a, double const b, double const t) const {
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        if (a > b) {
+            return ((-6 * a * b * t - 3 * std::sqrt(3) * a * t2 - sqrt(3) * b * t2 - 2 * t3) /
+                    (4. * std::exp((std::sqrt(3) * (a + b)) / t) * t3) + (std::exp((std::sqrt(3) * (-a + b)) / t) *
+                                                                          (2 * std::sqrt(3) * a2 * a -
+                                                                           6 * std::sqrt(3) * a2 * b +
+                                                                           6 * std::sqrt(3) * a * b2 -
+                                                                           2 * std::sqrt(3) * b2 * b +
+                                                                           6 * a2 * t - 12 * a * b * t + 6 * b2 * t -
+                                                                           std::sqrt(3) * a * t2 +
+                                                                           std::sqrt(3) * b * t2 - 2 * t3)) /
+                                                                         (4. * t3) +
+                    (std::exp((2 * std::sqrt(3) * b) / t - (std::sqrt(3) * (a + b)) / t) *
+                     (3 * std::sqrt(3) * a * t2 - 3 * std::sqrt(3) * b * t2 + 2 * t3)) / (4. * t3) +
+                    (std::exp((std::sqrt(3) * (-2 + a + b)) / t) *
+                     (6 * t - 6 * a * t - 6 * b * t + 6 * a * b * t + 4 * std::sqrt(3) * t2 -
+                      3 * std::sqrt(3) * a * t2 -
+                      std::sqrt(3) * b * t2 + 2 * t3)) / (4. * t3));
+        } else {
+            return ((std::exp((std::sqrt(3) * (a - b)) / t) * (2 * std::sqrt(3) * a2 * a - 6 * std::sqrt(3) * a2 * b +
+                                                               6 * std::sqrt(3) * a * b2 - 2 * std::sqrt(3) * b2 * b -
+                                                               6 * a2 * t + 12 * a * b * t -
+                                                               6 * b2 * t + 3 * std::sqrt(3) * a * t2 -
+                                                               3 * std::sqrt(3) * b * t2 -
+                                                               2 * t3)) / (4. * t3) +
+                    (-6 * a * b * t - 3 * std::sqrt(3) * a * t2 -
+                     std::sqrt(3) * b * t2 - 2 * t3) / (4. * std::exp((std::sqrt(3) * (a +
+                                                                                       b)) / t) * t3) +
+                    (std::exp((std::sqrt(3) * (-2 + a + b)) / t) * (6 * t - 6 * a * t -
+                                                                    6 * b * t + 6 * a * b * t + 4 * sqrt(3) * t2 -
+                                                                    3 * std::sqrt(3) * a * t2 -
+                                                                    std::sqrt(3) * b * t2 + 2 * t3)) / (4. * t3) +
+                    (std::exp((2 * std::sqrt(3) * a) / t - (std::sqrt(3) * (a + b)) / t) * (-(std::sqrt(3) * a * t2) +
+                                                                                            std::sqrt(3) * b * t2 +
+                                                                                            2 * t3)) / (4. * t3));
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // GENERAL METHODS
+
+    template<eCovTypes cov_type>
     inline arma::Mat<double>
-    GP<eCovTypes::gaussian>::w_kappa_ij(DesignLoader const &loader, uint16_t const derivative1,
+    GP<cov_type>::w_kappa_ij(DesignLoader const &loader, uint16_t const derivative1,
                                         uint16_t const derivative2) {
         arma::Mat<double> wij_temp(n_, n_);
         if (derivative1 == derivative2) {
@@ -123,14 +214,14 @@ namespace activegp {
 
         matrix_.resize(n_var_, n_var_);
         //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
-        theta_ = arma::sqrt(loader.theta_ / 2.);
+        theta_ = arma::sqrt(loader.theta_ / 4.);
 
         arma::Mat<double> kir = loader.k_inv_.t() * loader.response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
         for (uint16_t i = 0; i < n_var_; ++i) {
             // Unrolling their loop (first iter)
             arma::Mat<double> wii_temp = w_kappa_ij(loader, i, i);
-            double const theta_squared = std::pow(theta_.at(i), 2);
+            double const theta_squared = std::pow(theta_.at(i), 2.);
             arma::Mat<double> m =
                     (m_num_ / theta_squared) - arma::accu(loader.k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
             matrix_.at(i, i) = m.at(0, 0);
@@ -146,7 +237,6 @@ namespace activegp {
             }
         }
     }
-
 
 #endif //SEQ_LEARNING_GAUSSIAN_PROCESS_HPP
 }
