@@ -83,7 +83,7 @@ namespace activegp {
     }
 
     // -----------------------------------------------------------------------------------------------------------------
-    // MATTERN3_2 SPECIALISATION
+    // MATERN3_2 SPECIALISATION
 
     template<>
     const double GP<eCovTypes::matern_3_2>::m_num_ = 3;
@@ -169,12 +169,205 @@ namespace activegp {
     }
 
     // -----------------------------------------------------------------------------------------------------------------
+    // MATERN5_2 SPECIALISATION
+
+    template<>
+    const double GP<eCovTypes::matern_5_2>::m_num_ = 5 / 3;
+
+    template<>
+    inline double GP<eCovTypes::matern_5_2>::ikk(double a, double b, double const t) const {
+        if (b > a) std::swap(a, b);
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        return ((10 * (a - b) * exp((sqrt(5) * (-a + b)) / t) * (5 * a2 * a2 + 5 * b2 * b2 -
+                                                                 15 * sqrt(5) * b2 * b * t + 105 * b2 * t2 -
+                                                                 54 * sqrt(5) * b * t3 +
+                                                                 54 * t2 * t2 - 5 * a2 * a * (4 * b - 3 * sqrt(5) * t) +
+                                                                 15 * a2 * (2 * b2 - 3 * sqrt(5) * b * t + 7 * t2) +
+                                                                 a *
+                                                                 (-20 * b2 * b + 45 * sqrt(5) * b2 * t - 210 * b * t2 +
+                                                                  54 * sqrt(5) * t3)) +
+                 (3 * t * ((-50 * sqrt(5) * a2 * b2 - 200 * a2 * b * t - 200 * a * b2 * t - 50 * sqrt(5) * a2 * t2 -
+                            170 * sqrt(5) * a * b * t2 - 50 * sqrt(5) * b2 * t2 - 225 * a * t3 - 225 * b * t3 -
+                            63 * sqrt(5) * t2 * t2) * exp(-sqrt(5) * (a + b) / t) +
+                           exp(sqrt(5) * (b - a) / t) * t2 * (50 * sqrt(5) * a2 + 50 * sqrt(5) * b2 - 225 * b * t +
+                                                              63 * sqrt(5) * t2 +
+                                                              25 * a * (-4 * sqrt(5) * b + 9 * t)))) +
+                 3 * t * (exp((sqrt(5) * (-a + b)) / t) * t2 * (50 * sqrt(5) * a2 +
+                                                                50 * sqrt(5) * b2 - 25 * a * (4 * sqrt(5) * b - 9 * t) -
+                                                                225 * b * t +
+                                                                63 * sqrt(5) * t2) -
+                          exp((sqrt(5) * (-2 + a + b)) / t) * (50 * sqrt(5) +
+                                                               400 * t + 270 * sqrt(5) * t2 + 450 * t3 +
+                                                               63 * sqrt(5) * t2 * t2 +
+                                                               50 * b2 * (sqrt(5) + 4 * t + sqrt(5) * t2) -
+                                                               5 * b * (20 * sqrt(5) +
+                                                                        120 * t + 54 * sqrt(5) * t2 + 45 * t3) +
+                                                               50 * a2 * (sqrt(5) +
+                                                                          sqrt(5) * b2 + 4 * t + sqrt(5) * t2 -
+                                                                          2 * b * (sqrt(5) + 2 * t)) -
+                                                               5 * a *
+                                                               (20 * sqrt(5) + 120 * t + 54 * sqrt(5) * t2 + 45 * t3 +
+                                                                20 * b2 * (sqrt(5) + 2 * t) -
+                                                                2 * b * (20 * sqrt(5) + 80 * t +
+                                                                         17 * sqrt(5) * t2))))) / (540. * t2 * t2));
+    }
+
+    template<>
+    inline double GP<eCovTypes::matern_5_2>::w_ii(double a, double b, double const t) const {
+        if (b > a) std::swap(a, b);
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        return ((-50 * pow(a - b, 3) * exp((sqrt(5) * (-a + b)) / t) *
+                 (a2 - 2 * a * b + b2 + sqrt(5) * a * t - sqrt(5) * b * t + t2) +
+                 (3 * t * (exp(-(sqrt(5) * (a + b)) / t) *
+                           (-50 * sqrt(5) * a2 * b2 - 100 * a2 * b * t - 100 * a * b2 * t - 10 * sqrt(5) * a2 * t2 -
+                            50 * sqrt(5) * a * b * t2 - 10 * sqrt(5) * b2 * t2 - 35 * a * t3 - 35 * b * t3 -
+                            7 * sqrt(5) * t2 * t2) +
+                           exp(sqrt(5) * (b - a) / t) * t2 *
+                           (10 * sqrt(5) * a2 - 20 * sqrt(5) * a * b + 10 * sqrt(5) * b2 + 35 * a * t - 35 * b * t +
+                            7 * sqrt(5) * t2))) -
+                 3 * t * (-(exp((sqrt(5) * (-a + b)) / t) * t2 *
+                            (10 * sqrt(5) * a2 - 20 * sqrt(5) * a * b + 10 * sqrt(5) * b2 + 35 * a * t - 35 * b * t +
+                             7 * sqrt(5) * t2)) + exp((sqrt(5) * (-2 + a + b)) / t) *
+                                                  (50 * sqrt(5) + 200 * t + 70 * sqrt(5) * t2 + 70 * t3 +
+                                                   7 * sqrt(5) * t2 * t2 +
+                                                   10 * b2 * (5 * sqrt(5) + 10 * t + sqrt(5) * t2) -
+                                                   5 * b * (20 * sqrt(5) + 60 * t + 14 * sqrt(5) * t2 + 7 * t3) +
+                                                   10 * a2 * (5 * sqrt(5) + 5 * sqrt(5) * b2 + 10 * t + sqrt(5) * t2 -
+                                                              10 * b * (sqrt(5) + t)) - 5 * a * (20 * sqrt(5) + 60 * t +
+                                                                                                 14 * sqrt(5) * t2 +
+                                                                                                 7 * t3 + 20 * b2 *
+                                                                                                          (sqrt(5) +
+                                                                                                           t) - 10 * b *
+                                                                                                                (4 *
+                                                                                                                 sqrt(5) +
+                                                                                                                 8 * t +
+                                                                                                                 sqrt(5) *
+                                                                                                                 t2))))) /
+                (108. * t3 * t3));
+    }
+
+    template<>
+    inline double GP<eCovTypes::matern_5_2>::w_ij(double const a, double const b, double const t) const {
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        if (a > b) {
+            return ((10 * pow(a - b, 2) * exp((sqrt(5) * (-a + b)) / t) *
+                     (sqrt(5) * a2 * a - sqrt(5) * b2 * b + 10 * b2 * t - 9 * sqrt(5) * b * t2 + 9 * t3 +
+                      a2 * (-3 * sqrt(5) * b + 10 * t) + a * (3 * sqrt(5) * b2 - 20 * b * t + 9 * sqrt(5) * t2)) +
+                     (3 * t * ((-50 * a2 * b2 - 40 * sqrt(5) * a2 * b * t - 20 * sqrt(5) * a * b2 * t - 50 * a2 * t2 -
+                                90 * a * b * t2 - 10 * b2 * t2 - 25 * sqrt(5) * a * t3 - 11 * sqrt(5) * b * t3 -
+                                18 * t2 * t2) * exp(-(sqrt(5) * (a + b)) / t) +
+                               exp(sqrt(5) * (b - a) / t) * t2 *
+                               (50 * a2 + 50 * b2 + 25 * sqrt(5) * a * t + 18 * t2 - 25 * b * (4 * a + sqrt(5) * t)))) +
+                     3 * t *
+                     (-(exp((sqrt(5) * (-a + b)) / t) * t2 * (10 * a2 - 20 * a * b + 10 * b2 + 11 * sqrt(5) * a * t
+                                                              - 11 * sqrt(5) * b * t + 18 * t2)) +
+                      exp((sqrt(5) * (-2 + a +
+                                      b)) / t) * (10 * b2 * (5 + 2 * sqrt(5) * t + t2) - b * (100 +
+                                                                                              80 * sqrt(5) * t +
+                                                                                              110 * t2 +
+                                                                                              11 * sqrt(5) * t3) +
+                                                  2 * (25 +
+                                                       30 * sqrt(5) * t + 75 * t2 + 18 * sqrt(5) * t3 + 9 * t2 * t2) +
+                                                  10 * a2 * (5 + 5 * b2 + 4 * sqrt(5) * t + 5 * t2 - 2 * b * (5 +
+                                                                                                              2 *
+                                                                                                              sqrt(5) *
+                                                                                                              t)) -
+                                                  5 * a * (20 + 20 * sqrt(5) * t + 38 * t2 +
+                                                           5 * sqrt(5) * t3 + 4 * b2 * (5 + sqrt(5) * t) - 2 * b * (20 +
+                                                                                                                    12 *
+                                                                                                                    sqrt(5) *
+                                                                                                                    t +
+                                                                                                                    9 *
+                                                                                                                    t2))))) /
+                    (108. * t2 * t2 * t));
+        } else {
+            return ((10 * pow(a - b, 2) * exp((sqrt(5) * (a - b)) / t) *
+                     (sqrt(5) * a2 * a - sqrt(5) * b2 * b - 10 * b2 * t - 9 * sqrt(5) * b * t2 - 9 * t3 -
+                      a2 * (3 * sqrt(5) * b + 10 * t) + a * (3 * sqrt(5) * b2 + 20 * b * t + 9 * sqrt(5) * t2)) +
+                     (3 * t * ((-t2 * (10 * b2 + 11 * sqrt(5) * b * t + 18 * t2) -
+                                10 * a2 * (5 * b2 + 4 * sqrt(5) * b * t + 5 * t2) -
+                                5 * a * t * (4 * sqrt(5) * b2 + 18 * b * t + 5 * sqrt(5) * t2)) *
+                               exp(-sqrt(5) * (a + b) / t) + exp(sqrt(5) * (a - b) / t) * t2 *
+                                                             (10 * b2 + 10 * a2 + 11 * sqrt(5) * b * t + 18 * t2 -
+                                                              a * (20 * b + 11 * sqrt(5) * t)))) + 3 * t *
+                                                                                                   (-(exp((sqrt(5) *
+                                                                                                           (a - b)) /
+                                                                                                          t) * t2 *
+                                                                                                      (50 * a2 +
+                                                                                                       50 * b2 +
+                                                                                                       25 * sqrt(5) *
+                                                                                                       b * t + 18 * t2 -
+                                                                                                       25 * a * (4 * b +
+                                                                                                                 sqrt(5) *
+                                                                                                                 t))) +
+                                                                                                    exp((sqrt(5) *
+                                                                                                         (-2 + a + b)) /
+                                                                                                        t) * (10 * b2 *
+                                                                                                              (5 + 2 *
+                                                                                                                   sqrt(5) *
+                                                                                                                   t +
+                                                                                                               t2) - b *
+                                                                                                                     (100 +
+                                                                                                                      80 *
+                                                                                                                      sqrt(5) *
+                                                                                                                      t +
+                                                                                                                      110 *
+                                                                                                                      t2 +
+                                                                                                                      11 *
+                                                                                                                      sqrt(5) *
+                                                                                                                      t3) +
+                                                                                                              2 * (25 +
+                                                                                                                   30 *
+                                                                                                                   sqrt(5) *
+                                                                                                                   t +
+                                                                                                                   75 *
+                                                                                                                   t2 +
+                                                                                                                   18 *
+                                                                                                                   sqrt(5) *
+                                                                                                                   t3 +
+                                                                                                                   9 *
+                                                                                                                   t2 *
+                                                                                                                   t2) +
+                                                                                                              10 * a2 *
+                                                                                                              (5 +
+                                                                                                               5 * b2 +
+                                                                                                               4 *
+                                                                                                               sqrt(5) *
+                                                                                                               t +
+                                                                                                               5 * t2 -
+                                                                                                               2 * b *
+                                                                                                               (5 + 2 *
+                                                                                                                    sqrt(5) *
+                                                                                                                    t)) -
+                                                                                                              5 * a *
+                                                                                                              (20 + 20 *
+                                                                                                                    sqrt(5) *
+                                                                                                                    t +
+                                                                                                               38 * t2 +
+                                                                                                               5 *
+                                                                                                               sqrt(5) *
+                                                                                                               t3 +
+                                                                                                               4 * b2 *
+                                                                                                               (5 +
+                                                                                                                sqrt(5) *
+                                                                                                                t) -
+                                                                                                               2 * b *
+                                                                                                               (20 +
+                                                                                                                12 *
+                                                                                                                sqrt(5) *
+                                                                                                                t + 9 *
+                                                                                                                    t2))))) /
+                    (108. * t2 * t2 * t));
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
     // GENERAL METHODS
 
     template<eCovTypes cov_type>
     inline arma::Mat<double>
     GP<cov_type>::w_kappa_ij(DesignLoader const &loader, uint16_t const derivative1,
-                                        uint16_t const derivative2) {
+                             uint16_t const derivative2) {
         arma::Mat<double> wij_temp(n_, n_);
         if (derivative1 == derivative2) {
             for (int i = 0; i < n_; i++) {

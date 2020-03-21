@@ -1,8 +1,6 @@
 import numpy as np
-from GPy.kern import RBF, Matern32, White
+from GPy.kern import RBF
 from GPy.models import GPRegression
-from GPy.util import diag
-from GPy.util.linalg import pdinv, dpotrs, tdot
 
 DEBUG = True  # Uncomment this line for debug purposes
 
@@ -24,23 +22,18 @@ def c_consistence():
 
     response = np.array([np.sin(np.sum(row)) for row in design])
 
-    kernel = Matern32(input_dim=n_var, ARD=True) + White(2, 1e-8)
+    kernel = RBF(input_dim=n_var, ARD=True, name="main")
 
-    model = GPRegression(design, response.reshape(-1, 1), kernel, normalizer=True)
-    # model.optimize_restarts(5, max_iters=5000, robust=True)
+    model = GPRegression(design, response.reshape(-1, 1), kernel)
+
     model.optimize(messages=True, optimizer="lbfgsb")
 
-    theta = kernel.rbf.lengthscale
-    print(model, "\n")
-    print(theta)
+    theta = kernel.lengthscale
+    print(kernel.K(design) / kernel.variance)
+    k_inv = np.linalg.inv(kernel.K(design) + np.eye(n))
+    print(model)
 
-    # TODO: Cholesky that MF
-    k = kernel.K(design)
-    k_inv = np.linalg.inv(k)
-
-    print(kernel.variance)
-
-    mat = sl.C_gp(design, response, theta, k_inv, "Matern32")
+    mat = sl.C_gp(design, response, theta, k_inv, "Gaussian")
     print(real_c)
     print()
     print(mat)

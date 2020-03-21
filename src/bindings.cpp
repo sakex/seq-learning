@@ -44,6 +44,11 @@ select_type(np::ndarray &design, np::ndarray &response, np::ndarray &theta, np::
         case hashCovType("Matern32"):
         case hashCovType("matern32"):
             return c_gp<activegp::eCovTypes::matern_3_2>(design, response, theta, k_inv);
+        case hashCovType("Matern5_2"):
+        case hashCovType("matern5_2"):
+        case hashCovType("Matern52"):
+        case hashCovType("matern52"):
+            return c_gp<activegp::eCovTypes::matern_5_2>(design, response, theta, k_inv);
         default:
             throw activegp::InvalidCovType(s);
     }
