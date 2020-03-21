@@ -86,10 +86,10 @@ namespace activegp {
     // MATTERN3_2 SPECIALISATION
 
     template<>
-    const double GP<eCovTypes::mattern_3_2>::m_num_ = 3;
+    const double GP<eCovTypes::matern_3_2>::m_num_ = 3;
 
     template<>
-    inline double GP<eCovTypes::mattern_3_2>::ikk(double a, double b, double const t) const {
+    inline double GP<eCovTypes::matern_3_2>::ikk(double a, double b, double const t) const {
         if (b > a) std::swap(a, b);
         double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
         return ((-6 * std::sqrt(3) * a * b * t - 9 * a * t2 - 9 * b * t2 -
@@ -109,7 +109,7 @@ namespace activegp {
     }
 
     template<>
-    inline double GP<eCovTypes::mattern_3_2>::w_ii(double a, double b, double const t) const {
+    inline double GP<eCovTypes::matern_3_2>::w_ii(double a, double b, double const t) const {
         if (b > a) std::swap(a, b);
         double a2 = a * a, b2 = b * b, t2 = t * t;
         return ((-6 * std::sqrt(3) * a * b * t - 3 * a * t2 - 3 * b * t2 - std::sqrt(3) * t2 * t) /
@@ -129,7 +129,7 @@ namespace activegp {
     }
 
     template<>
-    inline double GP<eCovTypes::mattern_3_2>::w_ij(double const a, double const b, double const t) const {
+    inline double GP<eCovTypes::matern_3_2>::w_ij(double const a, double const b, double const t) const {
         double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
         if (a > b) {
             return ((-6 * a * b * t - 3 * std::sqrt(3) * a * t2 - sqrt(3) * b * t2 - 2 * t3) /
@@ -214,7 +214,7 @@ namespace activegp {
 
         matrix_.resize(n_var_, n_var_);
         //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
-        theta_ = arma::sqrt(loader.theta_ / 4.);
+        theta_ = arma::sqrt(loader.theta_ / 2.);
 
         arma::Mat<double> kir = loader.k_inv_.t() * loader.response_; // Cross product
         arma::Mat<double> t_kir = kir.t();

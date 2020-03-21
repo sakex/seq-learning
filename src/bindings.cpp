@@ -24,25 +24,32 @@ inline np::ndarray c_gp(np::ndarray &design, np::ndarray &response, np::ndarray 
 }
 
 
-constexpr unsigned hashCovType(const char *str, unsigned index = 0) {
-    return !str[index] ? 0x1505 : (hashCovType(str, index + 1) * (unsigned)0x21) ^ str[index];
+inline constexpr unsigned hashCovType(const char *str, unsigned index = 0) {
+    // Hash table computed at compilation for different branches
+    return !str[index] ? 0x1505 : (unsigned)(hashCovType(str, index + 1) * (unsigned) 0x21) ^ str[index];
 }
 
+// We don't inline bindings
 np::ndarray
 select_type(np::ndarray &design, np::ndarray &response, np::ndarray &theta, np::ndarray &k_inv, char const *s) {
-    unsigned hash = hashCovType(s);
+    unsigned const hash = hashCovType(s);
     switch (hash) {
         case hashCovType("Gaussian"):
+        case hashCovType("gaussian"):
+        case hashCovType("RBF"):
+        case hashCovType("rbf"):
             return c_gp<activegp::eCovTypes::gaussian>(design, response, theta, k_inv);
-        case hashCovType("Mattern3_2"):
-            return c_gp<activegp::eCovTypes::mattern_3_2>(design, response, theta, k_inv);
+        case hashCovType("Matern3_2"):
+        case hashCovType("matern3_2"):
+        case hashCovType("Matern32"):
+        case hashCovType("matern32"):
+            return c_gp<activegp::eCovTypes::matern_3_2>(design, response, theta, k_inv);
         default:
-            throw activegp::InvalidCovType(std::string(s));
+            throw activegp::InvalidCovType(s);
     }
 }
 
-void translate_exception(activegp::InvalidCovType const& e)
-{
+void translate_exception(activegp::InvalidCovType const &e) {
     // Use the Python 'C' API to set up an exception object
     PyErr_SetString(PyExc_RuntimeError, e.what());
 }
