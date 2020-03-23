@@ -26,7 +26,7 @@ inline np::ndarray c_gp(np::ndarray &design, np::ndarray &response, np::ndarray 
 
 inline constexpr unsigned hashCovType(const char *str, unsigned index = 0) {
     // Hash table computed at compilation for different branches
-    return !str[index] ? 0x1505 : (unsigned)(hashCovType(str, index + 1) * (unsigned) 0x21) ^ str[index];
+    return !str[index] ? 0x1505 : (hashCovType(str, index + 1) * 0x21) ^ (unsigned)str[index];
 }
 
 // We don't inline bindings

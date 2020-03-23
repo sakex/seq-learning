@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, WhiteKernel
+from sklearn.gaussian_process.kernels import ConstantKernel, RBF
 
 DEBUG = True  # Uncomment this line for debug purposes
 
@@ -14,26 +14,32 @@ import sequential_learning as sl
 
 n = 400
 n_var = 2
-real_c = np.full((2, 2), 1 / 8 * (3 + 2 * np.cos(2) - np.cos(4)))
-design = np.random.uniform(size=n * n_var).reshape(-1, 2)
-response = np.apply_along_axis(lambda x: np.sin(np.sum(x)), 1, design)
+noise = .4
 
-kernel = RBF(length_scale=(1, 1)) + WhiteKernel(noise_level=.5)
-# The only way to use this is to look at their code, no explanation anywhere in the docs
-# Spent hours on this
-gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10,
-                               optimizer="fmin_l_bfgs_b")
-gpr.fit(design, response.reshape(-1, 1))
+rbf = ConstantKernel(1.0) * RBF(length_scale=np.array([1.0, 1.0]))
+gpr = GaussianProcessRegressor(kernel=rbf, alpha=noise**2)
 
-theta = gpr.kernel_.k1.theta
+design = np.random.uniform(size=n * n_var).reshape((-1, n_var))
 
-print(theta)
+response = np.array([np.sin(np.sum(row)) for row in design])
+# Reuse training data from previous 1D example
+gpr.fit(design, response)
 
-cov = gpr.kernel_.__call__(design)
-k_inv = np.linalg.inv(cov + np.eye(n) * gpr.kernel_.k2.noise_level)
-print(k_inv)
+# Compute posterior predictive mean and covariance
+mu_s, cov_s = gpr.predict(design, return_cov=True)
 
-mat = sl.C_gp(design, response, theta, k_inv)
-print(real_c)
-print()
+# Obtain optimized kernel parameters
+l = gpr.kernel_.k2.get_params()['length_scale']
+sigma_f = np.sqrt(gpr.kernel_.k1.get_params()['constant_value'])
+
+# Compare with previous results
+print(gpr)
+print(l)
+print(sigma_f)
+k = gpr.kernel_.__call__(design)
+scale = k[0][0]
+k_inv = np.linalg.inv(cov_s)
+theta = l
+
+mat = sl.C_gp(design, response, theta, k_inv, "Matern52")
 print(mat)
