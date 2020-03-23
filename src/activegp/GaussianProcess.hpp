@@ -408,7 +408,6 @@ namespace activegp {
         matrix_.resize(n_var_, n_var_);
         //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
         theta_ = loader.theta_;
-        std::cout << "THETA" << theta_ << std::endl;
 
         arma::vec kir = loader.k_inv_.t() * loader.response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
