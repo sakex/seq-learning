@@ -28,10 +28,19 @@ namespace activegp {
         static const double m_num_;
         uint16_t n_var_ = 0;
         uint16_t n_ = 0;
+        uint16_t n_2_ = 0;
         arma::Mat<double> theta_;
         arma::Mat<double> matrix_;
 
+
         arma::Mat<double> w_kappa_ij(DesignLoader const &loader, uint16_t derivative1, uint16_t derivative2);
+
+        arma::Mat<double> w_kappa_ij2(DesignLoader const &loader, uint16_t derivative1, uint16_t derivative2);
+
+        arma::Mat<double> w_kappa_ii(DesignLoader const &loader, uint16_t derivative);
+
+        arma::Mat<double> w_kappa_ii2(DesignLoader const &loader, uint16_t derivative);
+
 
         [[nodiscard]] double ikk(double a, double b, double t) const;
 
@@ -369,20 +378,6 @@ namespace activegp {
     GP<cov_type>::w_kappa_ij(DesignLoader const &loader, uint16_t const derivative1,
                              uint16_t const derivative2) {
         arma::Mat<double> wij_temp(n_, n_);
-        if (derivative1 == derivative2) {
-            for (int i = 0; i < n_; i++) {
-                for (int j = i; j < n_; j++) {
-                    wij_temp.at(i, j) = w_ii(loader.design_(i, derivative1), loader.design_(j, derivative1),
-                                             theta_(derivative1));
-                    for (int k = 0; k < n_var_; k++) {
-                        if (k != derivative1)
-                            wij_temp.at(i, j) *= ikk(loader.design_(i, k), loader.design_(j, k), theta_(k));
-                    }
-                    wij_temp.at(j, i) = wij_temp.at(i, j);
-                }
-            }
-            return wij_temp;
-        }
         for (int i = 0; i < n_; i++) {
             for (int j = 0; j < n_; j++) {
                 wij_temp.at(i, j) = w_ij(loader.design_(i, derivative1), loader.design_(j, derivative1),
@@ -401,9 +396,67 @@ namespace activegp {
     }
 
     template<eCovTypes cov_type>
+    inline arma::Mat<double>
+    GP<cov_type>::w_kappa_ij2(DesignLoader const &loader, uint16_t const derivative1,
+                              uint16_t const derivative2) {
+        arma::Mat<double> wij_temp(n_, n_);
+        for (int i = 0; i < n_; i++) {
+            for (int j = 0; j < n_2_; j++) {
+                wij_temp.at(i, j) = w_ij(loader.design_(i, derivative1), loader.design_2_(j, derivative1),
+                                         theta_(derivative1)) *
+                                    w_ij(loader.design_(j, derivative2), loader.design_2_(i, derivative2),
+                                         theta_(derivative2));
+                if (n_var_ > 2) {
+                    for (int k = 0; k < n_var_; k++) {
+                        if (k != derivative1 && k != derivative2)
+                            wij_temp.at(i, j) *= ikk(loader.design_(i, k), loader.design_2_(j, k), theta_(k));
+                    }
+                }
+            }
+        }
+        return wij_temp;
+    }
+
+    template<eCovTypes cov_type>
+    inline arma::Mat<double>
+    GP<cov_type>::w_kappa_ii(DesignLoader const &loader, uint16_t const derivative) {
+        arma::Mat<double> wij_temp(n_, n_);
+        for (int i = 0; i < n_; i++) {
+            for (int j = i; j < n_; j++) {
+                wij_temp.at(i, j) = w_ii(loader.design_(i, derivative), loader.design_(j, derivative),
+                                         theta_(derivative));
+                for (int k = 0; k < n_var_; k++) {
+                    if (k != derivative)
+                        wij_temp.at(i, j) *= ikk(loader.design_(i, k), loader.design_(j, k), theta_(k));
+                }
+                wij_temp.at(j, i) = wij_temp.at(i, j);
+            }
+        }
+        return wij_temp;
+    }
+
+    template<eCovTypes cov_type>
+    inline arma::Mat<double>
+    GP<cov_type>::w_kappa_ii2(DesignLoader const &loader, uint16_t const derivative) {
+        arma::Mat<double> wij_temp(n_, n_2_);
+        for (int i = 0; i < n_; i++) {
+            for (int j = 0; j < n_2_; j++) {
+                wij_temp.at(i, j) = w_ii(loader.design_(i, derivative), loader.design_2_(j, derivative),
+                                         theta_(derivative));
+                for (int k = 0; k < n_var_; k++) {
+                    if (k != derivative)
+                        wij_temp.at(i, j) *= ikk(loader.design_(i, k), loader.design_2_(j, k), theta_(k));
+                }
+            }
+        }
+        return wij_temp;
+    }
+
+    template<eCovTypes cov_type>
     inline void GP<cov_type>::compute(DesignLoader const &loader) {
         n_var_ = loader.n_var_;
         n_ = loader.n_;
+        n_2_ = loader.n_2_;
 
         matrix_.resize(n_var_, n_var_);
         //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
@@ -411,17 +464,20 @@ namespace activegp {
 
         arma::vec kir = loader.k_inv_.t() * loader.response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
+
+        bool const new_design = loader.new_design;
+
         for (uint16_t i = 0; i < n_var_; ++i) {
             // Unrolling their loop (first iter)
-            arma::Mat<double> wii_temp = w_kappa_ij(loader, i, i);
+            arma::Mat<double> wii_temp = new_design ? w_kappa_ii(loader, i) : w_kappa_ii2(loader, i);
+            // Branch miss predictions shouldn't be that bad considering we are dealing with a constant bool
             double const theta_squared = std::pow(theta_.at(i), 2.);
             arma::Mat<double> m =
                     (m_num_ / theta_squared) - arma::accu(loader.k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
             matrix_.at(i, i) = m.at(0, 0);
             //wij_(i, i) = wij_temp_;
-
             for (uint16_t j = i + 1; j < n_var_; ++j) {
-                arma::Mat<double> wij_temp = w_kappa_ij(loader, i, j);
+                arma::Mat<double> wij_temp = new_design ? w_kappa_ij(loader, i, j) : w_kappa_ij2(loader, i, j);
                 m = -arma::accu(loader.k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
                 double const m_val = m(0, 0);
                 matrix_.at(i, j) = m_val;

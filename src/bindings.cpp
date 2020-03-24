@@ -1,12 +1,6 @@
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
-#include <assert.h>
-
-#ifdef __DEBUG__
-
-#include <iostream>
-
-#endif
+#include <cassert>
 
 #include "python_to_armadillo.hpp"
 #include "activegp/types/eCovTypes.h"
@@ -79,6 +73,7 @@ BOOST_PYTHON_MODULE (sequential_learning) {
     np::initialize();
     register_exception_translator<activegp::InvalidCovType>(&invalid_covtype_python);
     def("C_gp", &select_type,
-        (python::arg("X"), python::arg("Y"), python::arg("theta"), python::arg("Ki"),
+        (python::arg("X"), python::arg("Y"),
+                python::arg("theta"), python::arg("Ki"),
                 python::arg("type") = "RBF", python::arg("X2") = python::object()));
 }

@@ -11,15 +11,16 @@ namespace activegp {
     struct DesignLoader {
         uint16_t n_;
         uint16_t n_var_;
+        uint16_t n_2_;
+        bool new_design = false;
         arma::Mat<double> design_;
         arma::Mat<double> design_2_;
         arma::vec response_;
         arma::vec theta_;
         arma::Mat<double> k_inv_;
-        arma::Mat<double> X2_;
 
-        template <typename ...Ts>
-        void load_matrices(Ts&... parameters);
+        template<typename ...Ts>
+        void load_matrices(Ts &... parameters);
     };
 }
 

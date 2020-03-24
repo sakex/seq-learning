@@ -58,25 +58,19 @@ namespace python_extractor {
     }
 }
 
-// It's a programming assignment, so it's important we show we know many things about cpp
-#define LOAD_MATRICES(design, response, theta, k_inv) {\
-    Py_intptr_t const *shape = design.get_shape();\
-    n_ = shape[0];\
-    n_var_ = shape[1];\
-    python_extractor::py_to_arma(design, design_);\
-    python_extractor::py_to_arma(response, response_);\
-    python_extractor::py_to_arma(theta, theta_);\
-    python_extractor::py_to_arma(k_inv, k_inv_);\
-}
-
 template<>
 void
 activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray>(np::ndarray &design,
                                                                                           np::ndarray &response,
                                                                                           np::ndarray &theta,
                                                                                           np::ndarray &k_inv) {
-    LOAD_MATRICES(design, response, theta, k_inv);
-    X2_ = design_;
+    python_extractor::py_to_arma(design, design_);
+    python_extractor::py_to_arma(response, response_);
+    python_extractor::py_to_arma(theta, theta_);
+    python_extractor::py_to_arma(k_inv, k_inv_);
+    Py_intptr_t const *shape = design.get_shape();
+    n_ = shape[0];
+    n_var_ = shape[1];
 }
 
 template<>
@@ -85,9 +79,10 @@ void activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray
         np::ndarray &response,
         np::ndarray &theta,
         np::ndarray &k_inv,
-        np::ndarray &X2) {
-    LOAD_MATRICES(design, response, theta, k_inv);
-    python_extractor::py_to_arma(X2, X2_);
+        np::ndarray &design_2) {
+    load_matrices(design, response, theta, k_inv);
+    new_design = true;
+    python_extractor::py_to_arma(design_2, design_2_);
 }
 
 
