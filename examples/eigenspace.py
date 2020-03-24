@@ -24,7 +24,7 @@ def c_consistence():
 
     kernel = GPy.kern.Bias(n_var) * GPy.kern.RBF(n_var, lengthscale=np.array([1.0, 1.0]), ARD=True, name="rbf") + GPy.kern.White(n_var, variance=1)
     model = GPy.models.GPRegression(design, response.reshape(-1, 1), kernel)
-    model.optimize_restarts(4)
+    model.optimize_restarts(2)
     model.optimize(messages=True)
 
     sigma_f = model.kern.mul.bias.variance.values[0] * model.kern.mul.rbf.variance.values[0]
@@ -34,12 +34,9 @@ def c_consistence():
     theta = model.kern.mul.rbf.lengthscale.values
 
     mat = sl.C_gp(design, response, theta, k_inv, "RBF")
+    print(mat)
     norm = np.linalg.norm(mat - real_c)
     assert norm < 1e-3
-
-
-def subspace_dist(A, B):
-    return np.linalg.norm(np.dot(A, A.T) - np.dot(B, B.T), ord=2)
 
 
 def test_precomputed():
@@ -50,7 +47,6 @@ def test_precomputed():
     true_sub = np.array((1, 1)) / np.sqrt(2)
     mat = sl.C_gp(design, response, theta, kinv, "Gaussian")
     sub_est = np.linalg.eig(mat)[1][:, 0]
-    print(mat)
     assert subspace_dist(sub_est.reshape(1, 2), true_sub.reshape(1, 2)) < 1e-5
 
 
