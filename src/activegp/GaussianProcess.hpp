@@ -54,7 +54,7 @@ namespace activegp {
     // -----------------------------------------------------------------------------------------------------------------
     // GAUSSIAN SPCECIALISATION
     template<>
-    const double GP<eCovTypes::gaussian>::m_num_ = 1;
+    inline const double GP<eCovTypes::gaussian>::m_num_ = 1;
 
     template<>
     inline double GP<eCovTypes::gaussian>::ikk(double const a, double const b, double const t) const {
@@ -97,7 +97,7 @@ namespace activegp {
     // MATERN3_2 SPECIALISATION
 
     template<>
-    const double GP<eCovTypes::matern_3_2>::m_num_ = 3;
+    inline const double GP<eCovTypes::matern_3_2>::m_num_ = 3;
 
     template<>
     inline double GP<eCovTypes::matern_3_2>::ikk(double a, double b, double const t) const {
@@ -180,10 +180,10 @@ namespace activegp {
     }
 
     // -----------------------------------------------------------------------------------------------------------------
-    // MATERN5_2 SPECIALISATION
+    // MATERN_5_2 SPECIALISATION
 
     template<>
-    const double GP<eCovTypes::matern_5_2>::m_num_ = 5. / 3.;
+    inline const double GP<eCovTypes::matern_5_2>::m_num_ = 5. / 3.;
 
     template<>
     inline double GP<eCovTypes::matern_5_2>::ikk(double a, double b, double const t) const {
@@ -518,6 +518,6 @@ namespace activegp {
             }
         }
     }
+}
 
 #endif //SEQ_LEARNING_GAUSSIAN_PROCESS_HPP
-}

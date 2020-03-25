@@ -14,7 +14,7 @@ namespace np = boost::python::numpy;
 namespace python = boost::python;
 
 namespace python_extractor {
-    void py_to_arma(np::ndarray const &numpy_array, arma::Mat<double> &target) {
+    inline void py_to_arma(np::ndarray const &numpy_array, arma::Mat<double> &target) {
         uint16_t const nd = numpy_array.get_nd();
         assert(nd == 2); // Has to be 2 dimensional
         Py_intptr_t const *shape = numpy_array.get_shape();
@@ -30,7 +30,7 @@ namespace python_extractor {
         }
     }
 
-    void py_to_arma(np::ndarray const &numpy_array, arma::vec &target) {
+    inline void py_to_arma(np::ndarray const &numpy_array, arma::vec &target) {
         uint16_t const nd = numpy_array.get_nd();
         assert(nd == 1);
         Py_intptr_t const *shape = numpy_array.get_shape();
@@ -43,7 +43,7 @@ namespace python_extractor {
         }
     }
 
-    np::ndarray arma_to_py(arma::Mat<double> const &arma_mat) {
+    inline np::ndarray arma_to_py(arma::Mat<double> const &arma_mat) {
         uint16_t rows = arma_mat.n_rows;
         uint16_t columns = arma_mat.n_cols;
         python::tuple shape = python::make_tuple(rows, columns);
@@ -76,7 +76,7 @@ activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np:
 }
 
 template<>
-void
+inline void
 activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
         np::ndarray const &design,
         np::ndarray const &response,
