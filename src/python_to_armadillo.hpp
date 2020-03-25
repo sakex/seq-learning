@@ -77,13 +77,15 @@ activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np:
 
 template<>
 inline void
-activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
+activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
         np::ndarray const &design,
         np::ndarray const &response,
         np::ndarray const &theta,
         np::ndarray const &k_inv,
-        np::ndarray const &design_2) {
+        np::ndarray const &design_2,
+        np::ndarray const &k_inv_2) {
     load_matrices(design, response, theta, k_inv);
+    python_extractor::py_to_arma(k_inv_2, k_inv_2_);
     python_extractor::py_to_arma(design_2, design_2_);
     Py_intptr_t const *shape = design_2.get_shape();
     n_2_ = shape[0];

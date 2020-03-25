@@ -17,6 +17,7 @@ namespace activegp {
         arma::vec response_;
         arma::vec theta_;
         arma::Mat<double> k_inv_;
+        arma::Mat<double> k_inv_2_;
 
         template<typename ...Ts>
         void load_matrices(Ts const &... parameters);

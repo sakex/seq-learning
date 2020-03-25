@@ -9,7 +9,7 @@ if DEBUG:
     import os
 
     sys.path.append(os.path.abspath('Debug'))
-import sequential_learning as sl
+from sequential_learning import ASGP
 
 
 def c_consistence():
@@ -34,7 +34,9 @@ def c_consistence():
     k_inv = np.linalg.pinv(K)
     theta = model.kern.mul.rbf.lengthscale.values
 
-    mat = sl.C_gp(design, response, theta, k_inv, "RBF", 1)
+    c_ = ASGP(design, response, theta, k_inv, "RBF")
+    c_.compute()
+    mat = c_.mat
     print(mat)
     norm = np.linalg.norm(mat - real_c)
     assert norm < 1e-3

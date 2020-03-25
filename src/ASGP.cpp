@@ -5,10 +5,11 @@
 #include "ASGP.h"
 
 namespace PythonBindings {
+
     ASGP::ASGP(np::ndarray design, np::ndarray response, np::ndarray theta, np::ndarray ki, char const *s) :
             x_(std::move(design)), y_(std::move(response)), theta_(std::move(theta)),
-            ki_(std::move(ki)), x2_{np::array(python::make_tuple())},
-            ki2_{np::array(python::make_tuple())}, mat_{np::array(python::make_tuple())} {
+            ki_(std::move(ki)), x2_{np::array(python::object())},
+            ki2_{np::array(python::object())}, mat_{np::array(python::object())} {
         select_type(s);
     }
 
@@ -47,20 +48,11 @@ namespace PythonBindings {
     }
 
     void ASGP::compute() {
-        switch (type_) {
-            case activegp::eCovTypes::gaussian: {
-                compute_impl<activegp::eCovTypes::gaussian>();
-                break;
-            }
-            case activegp::eCovTypes::matern_3_2: {
-                compute_impl<activegp::eCovTypes::matern_3_2>();
-                break;
-            }
-            case activegp::eCovTypes::matern_5_2: {
-                compute_impl<activegp::eCovTypes::matern_5_2>();
-                break;
-            }
-        }
+        CHOOSE_IMPL(compute_impl);
+    }
+
+    void ASGP::update() {
+        CHOOSE_IMPL(update_impl);
     }
 
     np::ndarray ASGP::x() const {
@@ -80,22 +72,14 @@ namespace PythonBindings {
     }
 
     np::ndarray ASGP::x2() const {
-        return x_;
+        return x2_;
     }
 
     np::ndarray ASGP::ki2() const {
-        return x_;
+        return ki_;
     }
 
     np::ndarray ASGP::mat() const {
-        return x_;
+        return mat_;
     }
 }
-/*
-np::ndarray X2_arr = python::extract<np::ndarray>(X2);
-loader.load_matrices(design, response, theta, k_inv, X2_arr);
-gp.update(loader);
-return python_extractor::arma_to_py(gp.matrix());
-}
-}
- */

@@ -15,6 +15,23 @@ namespace np = boost::python::numpy;
 namespace python = boost::python;
 
 namespace PythonBindings {
+#define CHOOSE_IMPL(IMPL) {\
+        switch (type_) {\
+            case activegp::eCovTypes::gaussian: {\
+                IMPL<activegp::eCovTypes::gaussian>();\
+                break;\
+            }\
+            case activegp::eCovTypes::matern_3_2: {\
+                IMPL<activegp::eCovTypes::matern_3_2>();\
+                break;\
+            }\
+            case activegp::eCovTypes::matern_5_2: {\
+                IMPL<activegp::eCovTypes::matern_5_2>();\
+                break;\
+            }\
+    }\
+};
+
     class ASGP {
         // Active subspace Gaussian Process class exposed to Python
     public:
@@ -22,12 +39,20 @@ namespace PythonBindings {
 
         void compute();
 
+        void update();
+
         np::ndarray x() const;
+
         np::ndarray y() const;
+
         np::ndarray theta() const;
+
         np::ndarray ki() const;
+
         np::ndarray x2() const;
+
         np::ndarray ki2() const;
+
         np::ndarray mat() const;
 
     private:
@@ -51,9 +76,16 @@ namespace PythonBindings {
             gp.compute(loader);
             mat_ = python_extractor::arma_to_py(gp.matrix());
         }
+
+        template<activegp::eCovTypes cov_type>
+        inline void update_impl() {
+            activegp::GP<cov_type> gp;
+            activegp::DesignLoader loader;
+            loader.load_matrices(x_, y_, theta_, ki_, ki2_, x2_);
+            gp.update(loader);
+            mat_ = python_extractor::arma_to_py(gp.matrix());
+        }
     };
 
 }
-
-
 #endif //SEQ_LEARNING_ASGP_H
