@@ -20,6 +20,8 @@ namespace activegp {
 
         void compute(DesignLoader const &loader);
 
+        void update(DesignLoader const &loader);
+
         arma::Mat<double> const &matrix() {
             return matrix_;
         }
@@ -181,7 +183,7 @@ namespace activegp {
     // MATERN5_2 SPECIALISATION
 
     template<>
-    const double GP<eCovTypes::matern_5_2>::m_num_ = 5 / 3;
+    const double GP<eCovTypes::matern_5_2>::m_num_ = 5. / 3.;
 
     template<>
     inline double GP<eCovTypes::matern_5_2>::ikk(double a, double b, double const t) const {
@@ -456,6 +458,38 @@ namespace activegp {
     inline void GP<cov_type>::compute(DesignLoader const &loader) {
         n_var_ = loader.n_var_;
         n_ = loader.n_;
+
+        matrix_.resize(n_var_, n_var_);
+        //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
+        theta_ = loader.theta_;
+
+        arma::vec kir = loader.k_inv_.t() * loader.response_; // Cross product
+        arma::Mat<double> t_kir = kir.t();
+
+        for (uint16_t i = 0; i < n_var_; ++i) {
+            // Unrolling their loop (first iter)
+            arma::Mat<double> wii_temp = w_kappa_ii(loader, i);
+            // Branch miss predictions shouldn't be that bad considering we are dealing with a constant bool
+            double const theta_squared = std::pow(theta_.at(i), 2.);
+            arma::Mat<double> m =
+                    (m_num_ / theta_squared) - arma::accu(loader.k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
+            matrix_.at(i, i) = m.at(0, 0);
+            //wij_(i, i) = wij_temp_;
+            for (uint16_t j = i + 1; j < n_var_; ++j) {
+                arma::Mat<double> wij_temp = w_kappa_ij(loader, i, j);
+                m = -arma::accu(loader.k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
+                double const m_val = m(0, 0);
+                matrix_.at(i, j) = m_val;
+                matrix_.at(j, i) = m_val;
+                //wij_(i, j) = wij_temp_;
+            }
+        }
+    }
+
+    template<eCovTypes cov_type>
+    inline void GP<cov_type>::update(DesignLoader const &loader) {
+        n_var_ = loader.n_var_;
+        n_ = loader.n_;
         n_2_ = loader.n_2_;
 
         matrix_.resize(n_var_, n_var_);
@@ -465,11 +499,9 @@ namespace activegp {
         arma::vec kir = loader.k_inv_.t() * loader.response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
 
-        bool const new_design = loader.new_design;
-
         for (uint16_t i = 0; i < n_var_; ++i) {
             // Unrolling their loop (first iter)
-            arma::Mat<double> wii_temp = new_design ? w_kappa_ii(loader, i) : w_kappa_ii2(loader, i);
+            arma::Mat<double> wii_temp = w_kappa_ii2(loader, i);
             // Branch miss predictions shouldn't be that bad considering we are dealing with a constant bool
             double const theta_squared = std::pow(theta_.at(i), 2.);
             arma::Mat<double> m =
@@ -477,7 +509,7 @@ namespace activegp {
             matrix_.at(i, i) = m.at(0, 0);
             //wij_(i, i) = wij_temp_;
             for (uint16_t j = i + 1; j < n_var_; ++j) {
-                arma::Mat<double> wij_temp = new_design ? w_kappa_ij(loader, i, j) : w_kappa_ij2(loader, i, j);
+                arma::Mat<double> wij_temp = w_kappa_ij2(loader, i, j);
                 m = -arma::accu(loader.k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
                 double const m_val = m(0, 0);
                 matrix_.at(i, j) = m_val;

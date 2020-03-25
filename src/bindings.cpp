@@ -1,6 +1,5 @@
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
-#include <cassert>
 
 #include "python_to_armadillo.hpp"
 #include "activegp/types/eCovTypes.h"
@@ -12,21 +11,24 @@ namespace python = boost::python;
 
 template<activegp::eCovTypes cov_type>
 inline np::ndarray
-c_gp(np::ndarray &design, np::ndarray &response, np::ndarray &theta, np::ndarray &k_inv, python::object &X2) {
+c_gp(np::ndarray const &design, np::ndarray const &response, np::ndarray const &theta, np::ndarray const &k_inv,
+     python::object const &X2) {
+    // One of Boost.Python contributors told me to pass np::ndarray by value and not by reference
+    // Because they have shared pointer semantics https://github.com/boostorg/python/issues/297
+    // However, https://www.mantidproject.org/Some_C%2B%2B_Tips argues that copying the shared_ptr
+    // Would increment the ref counter for no good reason
+    // I think of it as the Rust borrowing system
     activegp::GP<cov_type> gp;
     activegp::DesignLoader loader;
     // If we didn't provide X2, then we provided None
-    if (X2.ptr() != python::object().ptr()) {
-        // We need to check that we indeed provided a np::array or it's UB
-        assert(X2.ptr()->ob_type == design.ptr()->ob_type);
-        // Little typecasting (don't call the police)
-        void *ptr = &X2;
-        np::ndarray *deref = {static_cast<np::ndarray *>(ptr)};
-        loader.load_matrices(design, response, theta, k_inv, *deref);
-    } else {
+    if (X2.is_none()) {
         loader.load_matrices(design, response, theta, k_inv);
+        gp.compute(loader);
+        return python_extractor::arma_to_py(gp.matrix());
     }
-    gp.compute(loader);
+    np::ndarray X2_arr = python::extract<np::ndarray>(X2);
+    loader.load_matrices(design, response, theta, k_inv, X2_arr);
+    gp.update(loader);
     return python_extractor::arma_to_py(gp.matrix());
 }
 
@@ -38,8 +40,8 @@ inline constexpr unsigned hashCovType(const char *str, unsigned index = 0) {
 
 // We don't inline bindings
 np::ndarray
-select_type(np::ndarray &design, np::ndarray &response, np::ndarray &theta, np::ndarray &k_inv, char const *s,
-            python::object &X2) {
+select_type(np::ndarray const &design, np::ndarray const &response, np::ndarray const &theta, np::ndarray const &k_inv,
+            char const *s, python::object const &X2) {
     unsigned const hash = hashCovType(s);
     switch (hash) {
         case hashCovType("Gaussian"):
@@ -63,7 +65,6 @@ select_type(np::ndarray &design, np::ndarray &response, np::ndarray &theta, np::
 }
 
 void invalid_covtype_python(activegp::InvalidCovType const &e) {
-    // Use the Python 'C' API to set up an exception object
     PyErr_SetString(PyExc_RuntimeError, e.what());
 }
 

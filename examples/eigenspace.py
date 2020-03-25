@@ -17,7 +17,7 @@ def c_consistence():
     n_var = 2
 
     design = np.random.uniform(size=n * n_var).reshape((-1, n_var))
-    new_design = np.random.uniform(size=n * n_var).reshape((-1, n_var))
+    new_design = np.random.uniform(size=(n // 2) * n_var).reshape((-1, n_var))
 
     response = np.array([np.sin(np.sum(row)) for row in design])
 
@@ -34,7 +34,7 @@ def c_consistence():
     k_inv = np.linalg.pinv(K)
     theta = model.kern.mul.rbf.lengthscale.values
 
-    mat = sl.C_gp(design, response, theta, k_inv, "RBF", design)
+    mat = sl.C_gp(design, response, theta, k_inv, "RBF", 1)
     print(mat)
     norm = np.linalg.norm(mat - real_c)
     assert norm < 1e-3

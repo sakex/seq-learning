@@ -59,30 +59,35 @@ namespace python_extractor {
 }
 
 template<>
-void
-activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray>(np::ndarray &design,
-                                                                                          np::ndarray &response,
-                                                                                          np::ndarray &theta,
-                                                                                          np::ndarray &k_inv) {
+inline void
+activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
+        np::ndarray const &design,
+        np::ndarray const &response,
+        np::ndarray const &theta,
+        np::ndarray const &k_inv) {
     python_extractor::py_to_arma(design, design_);
     python_extractor::py_to_arma(response, response_);
     python_extractor::py_to_arma(theta, theta_);
     python_extractor::py_to_arma(k_inv, k_inv_);
+    // Assertion on shape done before
     Py_intptr_t const *shape = design.get_shape();
     n_ = shape[0];
     n_var_ = shape[1];
 }
 
 template<>
-void activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
-        np::ndarray &design,
-        np::ndarray &response,
-        np::ndarray &theta,
-        np::ndarray &k_inv,
-        np::ndarray &design_2) {
+void
+activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
+        np::ndarray const &design,
+        np::ndarray const &response,
+        np::ndarray const &theta,
+        np::ndarray const &k_inv,
+        np::ndarray const &design_2) {
     load_matrices(design, response, theta, k_inv);
-    new_design = true;
     python_extractor::py_to_arma(design_2, design_2_);
+    Py_intptr_t const *shape = design_2.get_shape();
+    n_2_ = shape[0];
+    assert(n_var_ == shape[1]);
 }
 
 

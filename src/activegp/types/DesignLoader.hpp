@@ -12,7 +12,6 @@ namespace activegp {
         uint16_t n_;
         uint16_t n_var_;
         uint16_t n_2_;
-        bool new_design = false;
         arma::Mat<double> design_;
         arma::Mat<double> design_2_;
         arma::vec response_;
@@ -20,7 +19,7 @@ namespace activegp {
         arma::Mat<double> k_inv_;
 
         template<typename ...Ts>
-        void load_matrices(Ts &... parameters);
+        void load_matrices(Ts const &... parameters);
     };
 }
 
