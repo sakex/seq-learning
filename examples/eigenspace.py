@@ -37,7 +37,6 @@ def c_consistence():
     c_ = ASGP(design, response, theta, k_inv, "RBF")
     c_.compute()
     mat = c_.mat
-    print(mat)
     norm = np.linalg.norm(mat - real_c)
     assert norm < 1e-3
 

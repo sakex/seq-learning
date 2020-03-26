@@ -8,14 +8,11 @@ namespace PythonBindings {
 
     ASGP::ASGP(np::ndarray design, np::ndarray response, np::ndarray theta, np::ndarray ki, char const *s) :
             x_(std::move(design)), y_(std::move(response)), theta_(std::move(theta)),
-            ki_(std::move(ki)), x2_{np::array(python::object())},
-            ki2_{np::array(python::object())}, mat_{np::array(python::object())} {
+            ki_(std::move(ki)), x2_{np::array(python::object())}, ki2_{np::array(python::object())},
+            mat_{np::array(python::object())} {
         select_type(s);
     }
 
-    ASGP::~ASGP() {
-        delete gp_data;
-    }
 
     inline constexpr unsigned hashCovType(const char *str, unsigned index = 0) {
         // Hash table computed at compilation for different branches

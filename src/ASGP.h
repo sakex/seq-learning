@@ -37,8 +37,6 @@ namespace PythonBindings {
     public:
         ASGP(np::ndarray, np::ndarray, np::ndarray, np::ndarray, char const *s);
 
-        ~ASGP();
-
         void compute();
 
         void update();
@@ -59,7 +57,7 @@ namespace PythonBindings {
 
     private:
         activegp::eCovTypes type_;
-        activegp::GPMembers * gp_data = nullptr;
+        activegp::GPMembers gp_data;
         np::ndarray x_;
         np::ndarray y_;
         np::ndarray theta_;
@@ -83,28 +81,27 @@ namespace PythonBindings {
         }
 
         template<activegp::eCovTypes cov_type>
-        void load_matrices(activegp::GpImpl<cov_type> &gp) {
-            python_extractor::py_to_arma(x_, gp.design());
+        void update_matrices(activegp::GpImpl<cov_type> &gp) {
+            python_extractor::py_to_arma(ki2_, gp.k_inv2());
             python_extractor::py_to_arma(y_, gp.response());
-            python_extractor::py_to_arma(theta_, gp.theta());
-            python_extractor::py_to_arma(ki_, gp.k_inv());
+            python_extractor::py_to_arma(x2_, gp.design2());
             // Assertion on shape done before
             Py_intptr_t const *shape = x_.get_shape();
-            gp.shape(shape[0], shape[1]);
+            gp.n_2(shape[0]);
         }
 
         template<activegp::eCovTypes cov_type>
         inline void compute_impl() {
-            auto * gp = dynamic_cast<activegp::GpImpl<cov_type> *>(gp_data);
-            load_matrices<cov_type>(*gp);
-            gp->compute();
-            mat_ = python_extractor::arma_to_py(gp->matrix());
+            auto & gp = *static_cast<activegp::GpImpl<cov_type> *>(&gp_data);
+            load_matrices(gp);
+            gp.compute();
+            mat_ = python_extractor::arma_to_py(gp.matrix());
         }
 
         template<activegp::eCovTypes cov_type>
         inline void update_impl() {
-            activegp::GpImpl<cov_type> gp;
-            gp.load_matrices(x_, y_, theta_, ki_, ki2_, x2_);
+            auto & gp = *static_cast<activegp::GpImpl<cov_type> *>(&gp_data);
+            update_matrices(gp);
             gp.update();
             mat_ = python_extractor::arma_to_py(gp.matrix());
         }

@@ -57,23 +57,4 @@ namespace python_extractor {
     }
 }
 
-template<activegp::eCovTypes cov_type>
-template<>
-inline void
-activegp::GpImpl<cov_type>::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
-        np::ndarray const &design,
-        np::ndarray const &response,
-        np::ndarray const &theta,
-        np::ndarray const &k_inv,
-        np::ndarray const &design_2,
-        np::ndarray const &k_inv_2) {
-    load_matrices(design, response, theta, k_inv);
-    python_extractor::py_to_arma(k_inv_2, k_inv_2_);
-    python_extractor::py_to_arma(design_2, design_2_);
-    Py_intptr_t const *shape = design_2.get_shape();
-    n_2_ = shape[0];
-    assert(n_var_ == shape[1]);
-}
-
-
 #endif //SEQ_LEARNING_PYTHON_TO_ARMADILLO_HPP
