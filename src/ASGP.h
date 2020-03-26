@@ -39,8 +39,6 @@ namespace PythonBindings {
 
         void compute();
 
-        void update(np::ndarray, np::ndarray);
-
         [[nodiscard]] np::ndarray x() const;
 
         [[nodiscard]] np::ndarray y() const;
@@ -48,10 +46,6 @@ namespace PythonBindings {
         [[nodiscard]] np::ndarray theta() const;
 
         [[nodiscard]] np::ndarray ki() const;
-
-        [[nodiscard]] np::ndarray x2() const;
-
-        [[nodiscard]] np::ndarray ki2() const;
 
         [[nodiscard]] np::ndarray mat() const;
 
@@ -62,8 +56,6 @@ namespace PythonBindings {
         np::ndarray y_;
         np::ndarray theta_;
         np::ndarray ki_;
-        np::ndarray x2_;
-        np::ndarray ki2_;
         np::ndarray mat_;
 
     private:
@@ -78,17 +70,6 @@ namespace PythonBindings {
             // Assertion on shape done before
             Py_intptr_t const *shape = x_.get_shape();
             gp.shape(shape[0], shape[1]);
-        }
-
-        template<activegp::eCovTypes cov_type>
-        void update_matrices(activegp::GpImpl<cov_type> &gp) {
-            python_extractor::py_to_arma(ki2_, gp.k_inv2());
-            python_extractor::py_to_arma(x2_, gp.design2());
-            python_extractor::py_to_arma(lambda2_, gp.lambda2());
-            // Assertion on shape done before
-            Py_intptr_t const *shape = x2_.get_shape();
-            assert(shape[1] == gp.n_var());
-            gp.n_2(shape[0]);
         }
 
         template<activegp::eCovTypes cov_type>

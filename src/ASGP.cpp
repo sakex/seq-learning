@@ -8,8 +8,7 @@ namespace PythonBindings {
 
     ASGP::ASGP(np::ndarray design, np::ndarray response, np::ndarray theta, np::ndarray ki, char const *s) :
             x_(std::move(design)), y_(std::move(response)), theta_(std::move(theta)),
-            ki_(std::move(ki)), x2_{np::array(python::object())}, ki2_{np::array(python::object())},
-            mat_{np::array(python::object())} {
+            ki_(std::move(ki)), mat_{np::array(python::object())} {
         select_type(s);
     }
 
@@ -52,12 +51,6 @@ namespace PythonBindings {
         CHOOSE_IMPL(compute_impl);
     }
 
-    void ASGP::update(np::ndarray x2, np::ndarray ki2) {
-        x2_ = std::move(x2);
-        ki2_ = std::move(ki2);
-        CHOOSE_IMPL(update_impl);
-    }
-
     np::ndarray ASGP::x() const {
         return x_;
     }
@@ -71,14 +64,6 @@ namespace PythonBindings {
     }
 
     np::ndarray ASGP::ki() const {
-        return ki_;
-    }
-
-    np::ndarray ASGP::x2() const {
-        return x2_;
-    }
-
-    np::ndarray ASGP::ki2() const {
         return ki_;
     }
 

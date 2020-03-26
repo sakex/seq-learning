@@ -28,13 +28,10 @@ namespace PythonBindings {
                              args("X", "Y", "theta", "Ki", "type")
                      ))
                 .def("compute", &ASGP::compute)
-                .def("update", &ASGP::update, (arg("X2"), arg("Ki2")))
                 .add_property("X", &ASGP::x)
                 .add_property("Y", &ASGP::y)
                 .add_property("theta", &ASGP::theta)
                 .add_property("Ki", &ASGP::ki)
-                .add_property("X2", &ASGP::x2)
-                .add_property("Ki2", &ASGP::ki2)
                 .add_property("mat", &ASGP::mat);
     }
 }
