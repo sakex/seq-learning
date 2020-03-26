@@ -8,9 +8,12 @@
 #include "types/eCovTypes.h"
 #include <armadillo>
 #include <cmath>
+#include <vector>
 #include "helpers/constexprSqrt.hpp"
 
 namespace activegp {
+    typedef std::vector<std::vector<arma::Mat<double>>> MatrixOfMatrix;
+
     class GPMembers {
     public:
         virtual ~GPMembers() = default;
@@ -23,9 +26,10 @@ namespace activegp {
         arma::Mat<double> design_2_;
         arma::vec response_;
         arma::vec theta_;
-        arma::Mat<double> matrix_;
         arma::Mat<double> k_inv_;
         arma::Mat<double> k_inv_2_;
+        arma::Mat<double> matrix_;
+        MatrixOfMatrix wij_;
     };
 
     template<eCovTypes>
@@ -71,11 +75,13 @@ namespace activegp {
     private:
         [[nodiscard]] arma::Mat<double> w_kappa_ij(uint16_t, uint16_t) const;
 
-        [[nodiscard]] arma::Mat<double> w_kappa_ij2(uint16_t, uint16_t) const;
+        [[nodiscard]] arma::Mat<double>
+        w_kappa_ij2(arma::Mat<double> const &, arma::Mat<double> const &, uint16_t, uint16_t) const;
 
         [[nodiscard]] arma::Mat<double> w_kappa_ii(uint16_t) const;
 
-        [[nodiscard]] arma::Mat<double> w_kappa_ii2(uint16_t) const;
+        [[nodiscard]] arma::Mat<double>
+        w_kappa_ii2(arma::Mat<double> const &, arma::Mat<double> const &, uint16_t) const;
 
 
         [[nodiscard]] double ikk(double a, double b, double t) const;
@@ -432,18 +438,19 @@ namespace activegp {
 
     template<eCovTypes cov_type>
     inline arma::Mat<double>
-    GpImpl<cov_type>::w_kappa_ij2(uint16_t const derivative1, uint16_t const derivative2) const {
+    GpImpl<cov_type>::w_kappa_ij2(arma::Mat<double> const &X0, arma::Mat<double> const &X1, uint16_t const derivative1,
+                                  uint16_t const derivative2) const {
         arma::Mat<double> wij_temp(n_, n_);
         for (int i = 0; i < n_; i++) {
             for (int j = 0; j < n_2_; j++) {
-                wij_temp.at(i, j) = w_ij(design_(i, derivative1), design_2_(j, derivative1),
+                wij_temp.at(i, j) = w_ij(X0(i, derivative1), X1(j, derivative1),
                                          theta_(derivative1)) *
-                                    w_ij(design_(j, derivative2), design_2_(i, derivative2),
+                                    w_ij(X0(j, derivative2), X1(i, derivative2),
                                          theta_(derivative2));
                 if (n_var_ > 2) {
                     for (int k = 0; k < n_var_; k++) {
                         if (k != derivative1 && k != derivative2)
-                            wij_temp.at(i, j) *= ikk(design_(i, k), design_2_(j, k), theta_(k));
+                            wij_temp.at(i, j) *= ikk(X0(i, k), X1(j, k), theta_(k));
                     }
                 }
             }
@@ -471,15 +478,17 @@ namespace activegp {
 
     template<eCovTypes cov_type>
     inline arma::Mat<double>
-    GpImpl<cov_type>::w_kappa_ii2(uint16_t const derivative) const {
-        arma::Mat<double> wij_temp(n_, n_2_);
-        for (int i = 0; i < n_; i++) {
-            for (int j = 0; j < n_2_; j++) {
-                wij_temp.at(i, j) = w_ii(design_(i, derivative), design_2_(j, derivative),
-                                         theta_(derivative));
+    GpImpl<cov_type>::w_kappa_ii2(arma::Mat<double> const &X0, arma::Mat<double> const &X1,
+                                  uint16_t const derivative) const {
+        size_t const n1 = X0.n_rows;
+        size_t const n2 = X1.n_rows;
+        arma::Mat<double> wij_temp(n1, n2);
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n2; j++) {
+                wij_temp.at(i, j) = w_ii(X0(i, derivative), X1(j, derivative), theta_(derivative));
                 for (int k = 0; k < n_var_; k++) {
                     if (k != derivative)
-                        wij_temp.at(i, j) *= ikk(design_(i, k), design_2_(j, k), theta_(k));
+                        wij_temp.at(i, j) *= ikk(X0(i, k), X1(j, k), theta_(k));
                 }
             }
         }
@@ -489,7 +498,8 @@ namespace activegp {
     template<eCovTypes cov_type>
     inline void GpImpl<cov_type>::compute() {
         matrix_.resize(n_var_, n_var_);
-        //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
+        wij_.resize(n_var_); // Note that this is a matrix of matrices
+        for(auto & v: wij_) v.resize(n_var_);
 
         arma::vec kir = k_inv_.t() * response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
@@ -502,41 +512,32 @@ namespace activegp {
             arma::Mat<double> m =
                     (m_num_ / theta_squared) - arma::accu(k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
             matrix_.at(i, i) = m.at(0, 0);
-            //wij_(i, i) = wij_temp_;
+            wij_[i][i] = std::move(wii_temp);
             for (uint16_t j = i + 1; j < n_var_; ++j) {
                 arma::Mat<double> wij_temp = w_kappa_ij(i, j);
                 m = -arma::accu(k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
                 double const m_val = m(0, 0);
                 matrix_.at(i, j) = m_val;
                 matrix_.at(j, i) = m_val;
-                //wij_(i, j) = wij_temp_;
+                wij_[i][j] = std::move(wii_temp);
             }
         }
     }
 
     template<eCovTypes cov_type>
     inline void GpImpl<cov_type>::update() {
-        matrix_.resize(n_var_, n_var_);
         //wij_.resize(n_var_, n_var_); // Note that this is a matrix of matrices
-        arma::vec kir = k_inv_.t() * response_; // Cross product
-        arma::Mat<double> t_kir = kir.t();
-
+        arma::Mat<double> kikn = k_inv_ * k_inv_2_.t(); // T Cross product
+        arma::Mat<double> t_kikn = kikn.t();
+        arma::Mat<double> rbind = arma::join_vert(design_, design_2_);
         for (uint16_t i = 0; i < n_var_; ++i) {
-            // Unrolling their loop (first iter)
-            arma::Mat<double> wii_temp = w_kappa_ii2(i);
-            // Branch miss predictions shouldn't be that bad considering we are dealing with a constant bool
-            double const theta_squared = std::pow(theta_.at(i), 2.);
-            arma::Mat<double> m =
-                    (m_num_ / theta_squared) - arma::accu(k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
-            matrix_.at(i, i) = m.at(0, 0);
-            //wij_(i, i) = wij_temp_;
+            arma::vec wa = arma::vectorise(w_kappa_ii2(design_, design_2_, i));
+            arma::vec wb = arma::vectorise(w_kappa_ii2(design_2_, rbind, i));
+            double const w = wb(wb.n_elem - 1);
+            wb.shed_col(wb.n_elem - 1);
+            arma::Mat<double> kntKiWij = t_kikn * wij_[i][i];
+            arma::Mat<double> tmp = - (wa+wb).t() * gn;
             for (uint16_t j = i + 1; j < n_var_; ++j) {
-                arma::Mat<double> wij_temp = w_kappa_ij2(i, j);
-                m = -arma::accu(k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
-                double const m_val = m(0, 0);
-                matrix_.at(i, j) = m_val;
-                matrix_.at(j, i) = m_val;
-                //wij_(i, j) = wij_temp_;
             }
         }
     }

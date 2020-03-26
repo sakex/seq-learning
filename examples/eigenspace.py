@@ -34,9 +34,17 @@ def c_consistence():
     k_inv = np.linalg.pinv(K)
     theta = model.kern.mul.rbf.lengthscale.values
 
+    K2 = model.kern.K(design, new_design) / sigma_f
+
+    _, nug = model.predict(new_design, include_likelihood=True)
+    print(nug/_)
+    print(model)
+
     c_ = ASGP(design, response, theta, k_inv, "RBF")
     c_.compute()
     mat = c_.mat
+    print(mat)
+    print(c_.mat)
     norm = np.linalg.norm(mat - real_c)
     assert norm < 1e-3
 
