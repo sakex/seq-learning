@@ -37,26 +37,29 @@ namespace PythonBindings {
     public:
         ASGP(np::ndarray, np::ndarray, np::ndarray, np::ndarray, char const *s);
 
+        ~ASGP();
+
         void compute();
 
         void update();
 
-        np::ndarray x() const;
+        [[nodiscard]] np::ndarray x() const;
 
-        np::ndarray y() const;
+        [[nodiscard]] np::ndarray y() const;
 
-        np::ndarray theta() const;
+        [[nodiscard]] np::ndarray theta() const;
 
-        np::ndarray ki() const;
+        [[nodiscard]] np::ndarray ki() const;
 
-        np::ndarray x2() const;
+        [[nodiscard]] np::ndarray x2() const;
 
-        np::ndarray ki2() const;
+        [[nodiscard]] np::ndarray ki2() const;
 
-        np::ndarray mat() const;
+        [[nodiscard]] np::ndarray mat() const;
 
     private:
         activegp::eCovTypes type_;
+        activegp::GPMembers * gp_data = nullptr;
         np::ndarray x_;
         np::ndarray y_;
         np::ndarray theta_;
@@ -69,20 +72,40 @@ namespace PythonBindings {
         void select_type(char const *);
 
         template<activegp::eCovTypes cov_type>
+        void load_matrices(activegp::GpImpl<cov_type> &gp) {
+            python_extractor::py_to_arma(x_, gp.design());
+            python_extractor::py_to_arma(y_, gp.response());
+            python_extractor::py_to_arma(theta_, gp.theta());
+            python_extractor::py_to_arma(ki_, gp.k_inv());
+            // Assertion on shape done before
+            Py_intptr_t const *shape = x_.get_shape();
+            gp.shape(shape[0], shape[1]);
+        }
+
+        template<activegp::eCovTypes cov_type>
+        void load_matrices(activegp::GpImpl<cov_type> &gp) {
+            python_extractor::py_to_arma(x_, gp.design());
+            python_extractor::py_to_arma(y_, gp.response());
+            python_extractor::py_to_arma(theta_, gp.theta());
+            python_extractor::py_to_arma(ki_, gp.k_inv());
+            // Assertion on shape done before
+            Py_intptr_t const *shape = x_.get_shape();
+            gp.shape(shape[0], shape[1]);
+        }
+
+        template<activegp::eCovTypes cov_type>
         inline void compute_impl() {
-            activegp::GP<cov_type> gp;
-            activegp::DesignLoader loader;
-            loader.load_matrices(x_, y_, theta_, ki_);
-            gp.compute(loader);
-            mat_ = python_extractor::arma_to_py(gp.matrix());
+            auto * gp = dynamic_cast<activegp::GpImpl<cov_type> *>(gp_data);
+            load_matrices<cov_type>(*gp);
+            gp->compute();
+            mat_ = python_extractor::arma_to_py(gp->matrix());
         }
 
         template<activegp::eCovTypes cov_type>
         inline void update_impl() {
-            activegp::GP<cov_type> gp;
-            activegp::DesignLoader loader;
-            loader.load_matrices(x_, y_, theta_, ki_, ki2_, x2_);
-            gp.update(loader);
+            activegp::GpImpl<cov_type> gp;
+            gp.load_matrices(x_, y_, theta_, ki_, ki2_, x2_);
+            gp.update();
             mat_ = python_extractor::arma_to_py(gp.matrix());
         }
     };

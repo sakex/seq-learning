@@ -5,7 +5,6 @@
 #ifndef SEQ_LEARNING_PYTHON_TO_ARMADILLO_HPP
 #define SEQ_LEARNING_PYTHON_TO_ARMADILLO_HPP
 
-#include "activegp/types/DesignLoader.hpp"
 #include <armadillo>
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
@@ -58,26 +57,10 @@ namespace python_extractor {
     }
 }
 
+template<activegp::eCovTypes cov_type>
 template<>
 inline void
-activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
-        np::ndarray const &design,
-        np::ndarray const &response,
-        np::ndarray const &theta,
-        np::ndarray const &k_inv) {
-    python_extractor::py_to_arma(design, design_);
-    python_extractor::py_to_arma(response, response_);
-    python_extractor::py_to_arma(theta, theta_);
-    python_extractor::py_to_arma(k_inv, k_inv_);
-    // Assertion on shape done before
-    Py_intptr_t const *shape = design.get_shape();
-    n_ = shape[0];
-    n_var_ = shape[1];
-}
-
-template<>
-inline void
-activegp::DesignLoader::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
+activegp::GpImpl<cov_type>::load_matrices<np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray, np::ndarray>(
         np::ndarray const &design,
         np::ndarray const &response,
         np::ndarray const &theta,

@@ -13,6 +13,10 @@ namespace PythonBindings {
         select_type(s);
     }
 
+    ASGP::~ASGP() {
+        delete gp_data;
+    }
+
     inline constexpr unsigned hashCovType(const char *str, unsigned index = 0) {
         // Hash table computed at compilation for different branches
         return !str[index] ? 0x1505 : (hashCovType(str, index + 1) * 0x21) ^ (unsigned) str[index];
