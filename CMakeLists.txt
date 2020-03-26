@@ -4,7 +4,7 @@ project(seq_learning VERSION 0.1)
 set(CMAKE_CXX_STANDARD 17)
 
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -O3 -Werror=return-type -Wl,--no-undefined -D__DEBUG__=1")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -O3 -Werror=return-type -Wl,--no-undefined -D__DEBUG__=1 -flto -funroll-loops -march=native")
 
 
 # FIND PYTHON, ARMADILLO AND BOOST

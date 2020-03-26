@@ -30,6 +30,7 @@ namespace activegp {
 
     template<eCovTypes>
     class GpImpl : public GPMembers {
+        // Inspired by Rust OOP
     public:
         GpImpl() = default;
 
@@ -56,6 +57,8 @@ namespace activegp {
         arma::Mat<double> &k_inv();
 
         arma::Mat<double> &k_inv2();
+
+        uint16_t n_var() const;
 
         void shape(uint16_t, uint16_t);
 
@@ -551,6 +554,11 @@ namespace activegp {
     template<eCovTypes cov_type>
     inline arma::vec &GpImpl<cov_type>::response() {
         return response_;
+    }
+
+    template<eCovTypes cov_type>
+    inline uint16_t GpImpl<cov_type>::n_var() const {
+        return n_var_;
     }
 
     template<eCovTypes cov_type>

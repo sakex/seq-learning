@@ -52,7 +52,9 @@ namespace PythonBindings {
         CHOOSE_IMPL(compute_impl);
     }
 
-    void ASGP::update() {
+    void ASGP::update(np::ndarray x2, np::ndarray ki2) {
+        x2_ = std::move(x2);
+        ki2_ = std::move(ki2);
         CHOOSE_IMPL(update_impl);
     }
 

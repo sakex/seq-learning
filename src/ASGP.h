@@ -39,7 +39,7 @@ namespace PythonBindings {
 
         void compute();
 
-        void update();
+        void update(np::ndarray, np::ndarray);
 
         [[nodiscard]] np::ndarray x() const;
 
@@ -83,10 +83,10 @@ namespace PythonBindings {
         template<activegp::eCovTypes cov_type>
         void update_matrices(activegp::GpImpl<cov_type> &gp) {
             python_extractor::py_to_arma(ki2_, gp.k_inv2());
-            python_extractor::py_to_arma(y_, gp.response());
             python_extractor::py_to_arma(x2_, gp.design2());
             // Assertion on shape done before
-            Py_intptr_t const *shape = x_.get_shape();
+            Py_intptr_t const *shape = x2_.get_shape();
+            assert(shape[1] == gp.n_var());
             gp.n_2(shape[0]);
         }
 
