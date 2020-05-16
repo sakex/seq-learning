@@ -85,7 +85,7 @@ namespace activegp {
                 tx2 = t * 2.,
                 apb = a + b,
                 erf1 = std::erf(apb / tx2),
-                erf2 = std::erf((apb - 2) / (tx2)),
+                erf2 = std::erf((apb - 2.) / (tx2)),
                 _exp = std::exp(bma_squared / (4. * t * t));
         return (PI_SQRT * t) * _exp * (erf1 - erf2);
     }
@@ -94,21 +94,27 @@ namespace activegp {
     inline double GpImpl<eCovTypes::gaussian>::w_ii(double const a, double const b, double const t) const {
         constexpr double PI_SQRT = helpers::sqrt(M_PI);
         double const a2 = a * a, b2 = b * b, t2 = t * t;
-        return (1 / (8 * t2 * t) * ((2 * (-2 + a + b) * std::exp((-a2 - b2 - 2 + 2 * a + 2 * b) / (2 * t2)) * t +
-                                     std::exp(-(a - b) * (a - b) / (4 * t2)) * PI_SQRT * ((a - b) * (a - b) - 2 * t2) *
-                                     std::erf((-2 + a + b) / (2 * t))) -
-                                    (2 * (a + b) * t * std::exp(-((a2 + b2) / (2 * t2))) +
-                                     std::exp(-(a - b) * (a - b) / (4 * t2)) * PI_SQRT *
-                                     ((a - b) * (a - b) - 2 * t2) *
-                                     std::erf((a + b) / (2 * t)))));
+        double const a_plus_b = a + b;
+        double const a_minus_b = a - b;
+        double const t_times_2 = 2. * t;
+        double const a_minus_b_squared = a_minus_b * a_minus_b;
+        double const repeating = std::exp(-a_minus_b_squared / (4. * t2)) * PI_SQRT * (a_minus_b_squared - 2. * t2);
+        return (1. / (8. * t2 * t) *
+                ((2. * (-2. + a_plus_b) * std::exp((-a2 - b2 - 2. + 2. * a_plus_b) / (2. * t2)) * t +
+                  repeating *
+                  std::erf((-2. + a_plus_b) / t_times_2)) -
+                 (2. * (a + b) * t * std::exp(-((a2 + b2) / (2. * t2))) +
+                  repeating *
+                  std::erf((a_plus_b) / t_times_2))));
     }
 
     template<>
     inline double GpImpl<eCovTypes::gaussian>::w_ij(double const a, double const b, double const t) const {
         double a2 = a * a, b2 = b * b, t2 = t * t;
-        return (-((2 * (exp(-(a2 + b2) / (2 * t2)) - exp((-a2 - b2 + 2 * (a + b - 1)) / (2 * t2))) * t +
-                   (a - b) * exp(-(a - b) * (a - b) / (4 * t2)) * sqrt(M_PI) *
-                   (erf((-2 + a + b) / (2 * t)) - erf((a + b) / (2 * t))))) / (4 * t));
+        double constexpr PI_SQRT = helpers::sqrt(M_PI);
+        return (-((2. * (exp(-(a2 + b2) / (2. * t2)) - exp((-a2 - b2 + 2. * (a + b - 1.)) / (2. * t2))) * t +
+                   (a - b) * exp(-(a - b) * (a - b) / (4. * t2)) * PI_SQRT *
+                   (erf((-2. + a + b) / (2. * t)) - erf((a + b) / (2. * t))))) / (4. * t));
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -441,7 +447,7 @@ namespace activegp {
         arma::vec kir = k_inv_.t() * response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
 
-        auto && ii = [&](uint16_t const i) {
+        auto &&ii = [&](uint16_t const i) {
             arma::Mat<double> wii_temp = w_kappa_ii(i);
             double const theta_squared = std::pow(theta_.at(i), 2.);
             arma::Mat<double> m =
@@ -450,7 +456,7 @@ namespace activegp {
             // wij_[i][i] = std::move(wii_temp);
         };
 
-        auto && ij = [&](uint16_t const i, uint16_t const j) {
+        auto &&ij = [&](uint16_t const i, uint16_t const j) {
             arma::Mat<double> wij_temp = w_kappa_ij(i, j);
             arma::Mat<double> m = -arma::accu(k_inv_ % wij_temp) + (t_kir * (wij_temp * kir));
             double const m_val = m.at(0, 0);
