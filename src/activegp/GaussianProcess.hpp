@@ -417,12 +417,11 @@ namespace activegp {
 
         arma::vec kir = k_inv_.t() * response_; // Cross product
         arma::Mat<double> t_kir = kir.t();
-
         auto &&ii = [&](uint16_t const i) {
             arma::Mat<double> wii_temp = w_kappa_ii(i);
             double const theta_squared = std::pow(theta_.at(i), 2.);
-            arma::Mat<double> m =
-                    (m_num_ / theta_squared) - arma::accu(k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
+            arma::Mat<double> m = - arma::accu(k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
+            m = (m_num_ / theta_squared) + m;
             matrix_.at(i, i) = m.at(0, 0);
             // wij_[i][i] = std::move(wii_temp);
         };

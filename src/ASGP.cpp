@@ -32,7 +32,6 @@ namespace PythonBindings {
             case hashCovType("matern3_2"):
             case hashCovType("Matern32"):
             case hashCovType("matern32"): {
-                std::cout << 32 << std::endl;
                 type_ = activegp::eCovTypes::matern_3_2;
                 break;
             }
