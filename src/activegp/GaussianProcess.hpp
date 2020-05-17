@@ -125,81 +125,52 @@ namespace activegp {
 
     template<>
     inline double GpImpl<eCovTypes::matern_3_2>::ikk(double a, double b, double const t) const {
-        if (b > a) std::swap(a, b);
-        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
-        return ((-6 * std::sqrt(3) * a * b * t - 9 * a * t2 - 9 * b * t2 -
-                 5 * std::sqrt(3) * t3) / (12. * exp((std::sqrt(3) * (a + b)) / t) * t2) +
-                (std::exp((std::sqrt(3) * (-2 + a + b)) / t) * (-6 * std::sqrt(3) * t + 6 * std::sqrt(3) * a * t +
-                                                                6 * std::sqrt(3) * b * t -
-                                                                6 * std::sqrt(3) * a * b * t - 18 * t2 + 9 * a * t2 +
-                                                                9 * b * t2 - 5 * std::sqrt(3) * t3)) / (12. * t2) +
-                (std::exp((std::sqrt(3) * (-a + b)) / t) * (6 * a2 * a - 18 * a2 * b +
-                                                            18 * a * b2 - 6 * b2 * b + 12 * std::sqrt(3) * a2 * t -
-                                                            24 * std::sqrt(3) * a * b * t
-                                                            + 12 * std::sqrt(3) * b2 * t + 21 * a * t2 - 21 * b * t2 +
-                                                            5 * std::sqrt(3) * t3)) / (12. * t2) +
-                (std::exp((2 * std::sqrt(3) * b) / t -
-                          (std::sqrt(3) * (a + b)) / t) * (9 * a * t2 - 9 * b * t2 +
-                                                           5 * std::sqrt(3) * t3)) / (12. * t2));
+        if (b > a) {
+            double temp = a;
+            a = b;
+            b = temp;
+        }
+        double a2 = a*a, b2 = b*b, t2 = t*t, t3 = t2*t;
+        return((-6*sqrt(3)*a*b*t - 9*a*t2 - 9*b*t2 -                          \
+           5*sqrt(3)*t3)/(12.*exp((sqrt(3)*(a + b))/t)*t2) +              \
+           (exp((sqrt(3)*(-2 + a + b))/t)*(-6*sqrt(3)*t + 6*sqrt(3)*a*t + \
+           6*sqrt(3)*b*t - 6*sqrt(3)*a*b*t - 18*t2 + 9*a*t2 +             \
+           9*b*t2 - 5*sqrt(3)*t3))/(12.*t2) +                             \
+           (exp((sqrt(3)*(-a + b))/t)*(6*a2*a - 18*a2*b +                 \
+           18*a*b2 - 6*b2*b + 12*sqrt(3)*a2*t - 24*sqrt(3)*a*b*t          \
+           + 12*sqrt(3)*b2*t + 21*a*t2 - 21*b*t2 +                        \
+           5*sqrt(3)*t3))/(12.*t2) + (exp((2*sqrt(3)*b)/t -               \
+           (sqrt(3)*(a + b))/t)*(9*a*t2 - 9*b*t2 +                        \
+           5*sqrt(3)*t3))/(12.*t2));
     }
 
     template<>
     inline double GpImpl<eCovTypes::matern_3_2>::w_ii(double a, double b, double const t) const {
-        if (b > a) std::swap(a, b);
-        double a2 = a * a, b2 = b * b, t2 = t * t;
-        return ((-6 * std::sqrt(3) * a * b * t - 3 * a * t2 - 3 * b * t2 - std::sqrt(3) * t2 * t) /
-                (4. * std::exp((std::sqrt(3) * (a + b)) / t) * t2 * t2) + (std::exp((std::sqrt(3) * (-2 + a + b)) / t) *
-                                                                           (-6 * std::sqrt(3) * t +
-                                                                            6 * std::sqrt(3) * a * t +
-                                                                            6 * std::sqrt(3) * b * t -
-                                                                            6 * std::sqrt(3) * a * b * t -
-                                                                            6 * t2 + 3 * a * t2 + 3 * b * t2 -
-                                                                            std::sqrt(3) * t2 * t)) / (4. * t2 * t2) +
-                (std::exp((2 * std::sqrt(3) * b) / t - (std::sqrt(3) * (a + b)) / t) *
-                 (3 * a * t2 - 3 * b * t2 + std::sqrt(3) * t2 * t)) /
-                (4. * t2 * t2) + (std::exp((std::sqrt(3) * (-a + b)) / t) *
-                                  (-6 * a2 * a + 18 * a2 * b - 18 * a * b2 + 6 * b2 * b + 3 * a * t2 - 3 * b * t2 +
-                                   std::sqrt(3) * t2 * t)) / (4. * t2 * t2));
-
+        if (b > a) {
+            double temp = a;
+            a = b;
+            b = temp;
+        }
+        double a2 = a*a, b2 = b*b, t2 = t*t;
+        return((-6*sqrt(3)*a*b*t - 3*a*t2 - 3*b*t2 - sqrt(3)*t2*t)/(4.*exp((sqrt(3)*(a + b))/t)*t2*t2) + (exp((sqrt(3)*(-2 + a + b))/t)*(-6*sqrt(3)*t + 6*sqrt(3)*a*t + 6*sqrt(3)*b*t - 6*sqrt(3)*a*b*t - 6*t2 + 3*a*t2 + 3*b*t2 - sqrt(3)*t2*t))/(4.*t2*t2) + (exp((2*sqrt(3)*b)/t - (sqrt(3)*(a + b))/t)*(3*a*t2 - 3*b*t2 + sqrt(3)*t2*t))/(4.*t2*t2) + (exp((sqrt(3)*(-a + b))/t)*(-6*a2*a + 18*a2*b - 18*a*b2 + 6*b2*b + 3*a*t2 - 3*b*t2 + sqrt(3)*t2*t))/(4.*t2*t2));
     }
 
     template<>
     inline double GpImpl<eCovTypes::matern_3_2>::w_ij(double const a, double const b, double const t) const {
-        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        double a2 = a*a, b2 = b*b, t2 = t*t, t3 = t2*t;
         if (a > b) {
-            return ((-6 * a * b * t - 3 * std::sqrt(3) * a * t2 - sqrt(3) * b * t2 - 2 * t3) /
-                    (4. * std::exp((std::sqrt(3) * (a + b)) / t) * t3) + (std::exp((std::sqrt(3) * (-a + b)) / t) *
-                                                                          (2 * std::sqrt(3) * a2 * a -
-                                                                           6 * std::sqrt(3) * a2 * b +
-                                                                           6 * std::sqrt(3) * a * b2 -
-                                                                           2 * std::sqrt(3) * b2 * b +
-                                                                           6 * a2 * t - 12 * a * b * t + 6 * b2 * t -
-                                                                           std::sqrt(3) * a * t2 +
-                                                                           std::sqrt(3) * b * t2 - 2 * t3)) /
-                                                                         (4. * t3) +
-                    (std::exp((2 * std::sqrt(3) * b) / t - (std::sqrt(3) * (a + b)) / t) *
-                     (3 * std::sqrt(3) * a * t2 - 3 * std::sqrt(3) * b * t2 + 2 * t3)) / (4. * t3) +
-                    (std::exp((std::sqrt(3) * (-2 + a + b)) / t) *
-                     (6 * t - 6 * a * t - 6 * b * t + 6 * a * b * t + 4 * std::sqrt(3) * t2 -
-                      3 * std::sqrt(3) * a * t2 -
-                      std::sqrt(3) * b * t2 + 2 * t3)) / (4. * t3));
+            return((-6*a*b*t - 3*sqrt(3)*a*t2 - sqrt(3)*b*t2 - 2*t3)/(4.*exp((sqrt(3)*(a + b))/t)*t3) + (exp((sqrt(3)*(-a + b))/t)*(2*sqrt(3)*a2*a - 6*sqrt(3)*a2*b + 6*sqrt(3)*a*b2 - 2*sqrt(3)*b2*b + 6*a2*t - 12*a*b*t + 6*b2*t - sqrt(3)*a*t2 + sqrt(3)*b*t2 - 2*t3))/(4.*t3) + (exp((2*sqrt(3)*b)/t - (sqrt(3)*(a + b))/t)*(3*sqrt(3)*a*t2 - 3*sqrt(3)*b*t2 + 2*t3))/(4.*t3) + (exp((sqrt(3)*(-2 + a + b))/t)*(6*t - 6*a*t - 6*b*t + 6*a*b*t + 4*sqrt(3)*t2 - 3*sqrt(3)*a*t2 - sqrt(3)*b*t2 + 2*t3))/(4.*t3));
         } else {
-            return ((std::exp((std::sqrt(3) * (a - b)) / t) * (2 * std::sqrt(3) * a2 * a - 6 * std::sqrt(3) * a2 * b +
-                                                               6 * std::sqrt(3) * a * b2 - 2 * std::sqrt(3) * b2 * b -
-                                                               6 * a2 * t + 12 * a * b * t -
-                                                               6 * b2 * t + 3 * std::sqrt(3) * a * t2 -
-                                                               3 * std::sqrt(3) * b * t2 -
-                                                               2 * t3)) / (4. * t3) +
-                    (-6 * a * b * t - 3 * std::sqrt(3) * a * t2 -
-                     std::sqrt(3) * b * t2 - 2 * t3) / (4. * std::exp((std::sqrt(3) * (a +
-                                                                                       b)) / t) * t3) +
-                    (std::exp((std::sqrt(3) * (-2 + a + b)) / t) * (6 * t - 6 * a * t -
-                                                                    6 * b * t + 6 * a * b * t + 4 * sqrt(3) * t2 -
-                                                                    3 * std::sqrt(3) * a * t2 -
-                                                                    std::sqrt(3) * b * t2 + 2 * t3)) / (4. * t3) +
-                    (std::exp((2 * std::sqrt(3) * a) / t - (std::sqrt(3) * (a + b)) / t) * (-(std::sqrt(3) * a * t2) +
-                                                                                            std::sqrt(3) * b * t2 +
-                                                                                            2 * t3)) / (4. * t3));
+            return((exp((sqrt(3)*(a - b))/t)*(2*sqrt(3)*a2*a - 6*sqrt(3)*a2*b +                                 \
+             6*sqrt(3)*a*b2 - 2*sqrt(3)*b2*b - 6*a2*t + 12*a*b*t -                                        \
+             6*b2*t + 3*sqrt(3)*a*t2 - 3*sqrt(3)*b*t2 -                                                   \
+             2*t3))/(4.*t3) + (-6*a*b*t - 3*sqrt(3)*a*t2 -                                                \
+             sqrt(3)*b*t2 - 2*t3)/(4.*exp((sqrt(3)*(a +                                                   \
+             b))/t)*t3) + (exp((sqrt(3)*(-2 + a + b))/t)*(6*t - 6*a*t -                                   \
+             6*b*t + 6*a*b*t + 4*sqrt(3)*t2 - 3*sqrt(3)*a*t2 -                                            \
+             sqrt(3)*b*t2 + 2*t3))/(4.*t3) +                                                              \
+             (exp((2*sqrt(3)*a)/t - (sqrt(3)*(a + b))/t)*(-(sqrt(3)*a*t2) +                               \
+             sqrt(3)*b*t2 + 2*t3))/(4.*t3));
         }
     }
 

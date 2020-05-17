@@ -31,6 +31,7 @@ def c_consistence():
     K = model.kern.K(design) / sigma_f
     k_inv = np.linalg.pinv(K)
     theta = model.kern.rbf.lengthscale.values
+    print(theta)
 
     c_ = ASGP(design, response, theta, k_inv, "RBF")
     c_.compute()
@@ -86,6 +87,6 @@ def test_precomputed():
 
 
 if __name__ == "__main__":
-    c_consistence()
+    # c_consistence()
     c_consistence_matern32()
     # test_precomputed()
