@@ -26,7 +26,7 @@ def _check_length_scale(X, length_scale):
 
 
 def c_consistence(n_var, kernel, name):
-    n = 400
+    n = 200
 
     design = np.random.uniform(size=n * n_var).reshape((-1, n_var))
     response = np.array([np.sin(np.sum(row)) for row in design])
@@ -44,6 +44,9 @@ def c_consistence(n_var, kernel, name):
 
     Ki = k_inv * sigma_f
 
+    print(np.linalg.pinv(Ki))
+
+    print(theta)
     c_ = ASGP(design, response, theta, Ki, name)
     c_.compute()
     mat = c_.mat
@@ -52,23 +55,15 @@ def c_consistence(n_var, kernel, name):
     # assert norm < 1e-3
 
 
-def test_precomputed():
-    from data import design, response, kinv, theta
-    response, theta = map(lambda item: np.array(item), (response, theta))
-    kinv = np.array(kinv).reshape(400, 400, order="F")
-    design = np.array(design).reshape(-1, 2, order="F")
-    true_sub = np.array((1, 1)) / np.sqrt(2)
-    mat = sl.C_gp(design, response, theta, kinv, "Gaussian")
-    sub_est = np.linalg.eig(mat)[1][:, 0]
-    assert subspace_dist(sub_est.reshape(1, 2), true_sub.reshape(1, 2)) < 1e-5
-
-
 if __name__ == "__main__":
     def main():
         n_var = 2
-        rbf = ConstantKernel(1e-8) * RBF(length_scale=np.array([1.0, 1.0])) + WhiteKernel(noise_level=1)
-        matern32 = ConstantKernel(1e-8) * Matern(length_scale=np.array([1.0, 1.0]), nu=1.5) + WhiteKernel(noise_level=.5)
-        matern52 = ConstantKernel(1e-8) * Matern(length_scale=np.array([1.0, 1.0]), nu=2.5) + WhiteKernel(noise_level=1)
+        rbf = ConstantKernel(1e-8) * RBF(length_scale=np.array([1.0 for _ in range(n_var)])) + WhiteKernel(
+            noise_level=1)
+        matern32 = ConstantKernel(1e-8) * Matern(length_scale=np.array([1.0 for _ in range(n_var)]),
+                                                 nu=1.5) + WhiteKernel(noise_level=1)
+        matern52 = ConstantKernel(1e-8) * Matern(length_scale=np.array([1.0 for _ in range(n_var)]),
+                                                 nu=2.5) + WhiteKernel(noise_level=1)
         kerns = [rbf, matern32, matern52]
         names = ("RBF", "Matern32", "Matern52")
         for kern, name in zip(kerns, names):

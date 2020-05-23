@@ -46,4 +46,3 @@ def c_consistence_rbf():
 
 if __name__ == "__main__":
     c_consistence_rbf()
-    # test_precomputed()
