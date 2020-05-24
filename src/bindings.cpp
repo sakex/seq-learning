@@ -12,11 +12,19 @@ namespace PythonBindings {
         PyErr_SetString(PyExc_RuntimeError, e.what());
     }
 
+    char const * test_import(char const * input) {
+        char * ret = (char*)malloc(sizeof(char) * (8 + strlen(input)));
+        strcpy(ret, "Input: ");
+        strcat(ret, input);
+        return ret;
+    }
+
     BOOST_PYTHON_MODULE (sequential_learning) {
         using namespace boost::python;
         Py_Initialize();
         np::initialize();
         register_exception_translator<activegp::InvalidCovType>(&invalid_covtype_python);
+        def("test_import", &test_import);
         class_<ASGP>("ASGP", "A wrapper for Active Subspaces of Gaussian Process",
                      init<np::ndarray, np::ndarray, np::ndarray, np::ndarray, char const *>(
                              args("X", "Y", "theta", "Ki", "type")

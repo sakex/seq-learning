@@ -16,6 +16,7 @@ namespace threading {
         max_threads--;
         std::mutex locker;
         std::vector<std::thread> threads;
+        threads.reserve(max_threads);
         int *_i = new int(0);
         int *_j = new int(0);
         // Making sure we are on the heap

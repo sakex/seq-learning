@@ -112,8 +112,9 @@ namespace activegp {
     inline double GpImpl<eCovTypes::gaussian>::w_ij(double const a, double const b, double const t) const {
         double a2 = a * a, b2 = b * b, t2 = t * t;
         double constexpr PI_SQRT = helpers::sqrt(M_PI);
+        double const a_m_b = a - b;
         return (-((2. * (exp(-(a2 + b2) / (2. * t2)) - exp((-a2 - b2 + 2. * (a + b - 1.)) / (2. * t2))) * t +
-                   (a - b) * exp(-(a - b) * (a - b) / (4. * t2)) * PI_SQRT *
+                    a_m_b * exp(-a_m_b * a_m_b / (4. * t2)) * PI_SQRT *
                    (erf((-2. + a + b) / (2. * t)) - erf((a + b) / (2. * t))))) / (4. * t));
     }
 
@@ -131,7 +132,9 @@ namespace activegp {
             b = temp;
         }
         double a2 = a*a, b2 = b*b, t2 = t*t, t3 = t2*t;
-        return((-6*sqrt(3)*a*b*t - 9*a*t2 - 9*b*t2 -                          \
+        double constexpr sqrt_3 = helpers::sqrt(3.);
+        double constexpr six_sqrt_3 = 6.*sqrt_3;
+        return((-six_sqrt_3*a*b*t - (a+b)*9.*t2 -                          \
            5*sqrt(3)*t3)/(12.*exp((sqrt(3)*(a + b))/t)*t2) +              \
            (exp((sqrt(3)*(-2 + a + b))/t)*(-6*sqrt(3)*t + 6*sqrt(3)*a*t + \
            6*sqrt(3)*b*t - 6*sqrt(3)*a*b*t - 18*t2 + 9*a*t2 +             \
