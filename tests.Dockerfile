@@ -3,7 +3,7 @@ FROM ubuntu:latest
 RUN apt-get update
 
 # Install other dependencies
-RUN apt-get install -y wget curl python3 python3-pip wget libboost-python-dev libboost-dev build-essential zlib1g-dev \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget curl python3 python3-pip wget libboost-python-dev libboost-dev build-essential zlib1g-dev \
 libboost-system-dev libboost-program-options-dev libarmadillo-dev libboost-numpy-dev gcc g++ cmake
 
 # RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 1 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
