@@ -22,9 +22,10 @@
     cmake . Debug
     cmake --build Debug
     
-# Run
+# Run tests
 
-    python3 examples/egeinspace.py
+    python -m unittest tests.py
+
 
 # Build original R package (Linux)
 

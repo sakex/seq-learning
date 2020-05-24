@@ -114,7 +114,7 @@ namespace activegp {
         double constexpr PI_SQRT = helpers::sqrt(M_PI);
         double const a_m_b = a - b;
         return (-((2. * (exp(-(a2 + b2) / (2. * t2)) - exp((-a2 - b2 + 2. * (a + b - 1.)) / (2. * t2))) * t +
-                    a_m_b * exp(-a_m_b * a_m_b / (4. * t2)) * PI_SQRT *
+                   a_m_b * exp(-a_m_b * a_m_b / (4. * t2)) * PI_SQRT *
                    (erf((-2. + a + b) / (2. * t)) - erf((a + b) / (2. * t))))) / (4. * t));
     }
 
@@ -131,20 +131,20 @@ namespace activegp {
             a = b;
             b = temp;
         }
-        double a2 = a*a, b2 = b*b, t2 = t*t, t3 = t2*t;
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
         double constexpr sqrt_3 = helpers::sqrt(3.);
-        double constexpr six_sqrt_3 = 6.*sqrt_3;
-        return((-six_sqrt_3*a*b*t - (a+b)*9.*t2 -                          \
-           5*sqrt(3)*t3)/(12.*exp((sqrt(3)*(a + b))/t)*t2) +              \
-           (exp((sqrt(3)*(-2 + a + b))/t)*(-6*sqrt(3)*t + 6*sqrt(3)*a*t + \
-           6*sqrt(3)*b*t - 6*sqrt(3)*a*b*t - 18*t2 + 9*a*t2 +             \
-           9*b*t2 - 5*sqrt(3)*t3))/(12.*t2) +                             \
-           (exp((sqrt(3)*(-a + b))/t)*(6*a2*a - 18*a2*b +                 \
-           18*a*b2 - 6*b2*b + 12*sqrt(3)*a2*t - 24*sqrt(3)*a*b*t          \
-           + 12*sqrt(3)*b2*t + 21*a*t2 - 21*b*t2 +                        \
-           5*sqrt(3)*t3))/(12.*t2) + (exp((2*sqrt(3)*b)/t -               \
-           (sqrt(3)*(a + b))/t)*(9*a*t2 - 9*b*t2 +                        \
-           5*sqrt(3)*t3))/(12.*t2));
+        double constexpr six_sqrt_3 = 6. * sqrt_3;
+        return ((-six_sqrt_3 * a * b * t - (a + b) * 9. * t2 - \
+           5 * sqrt(3) * t3) / (12. * exp((sqrt(3) * (a + b)) / t) * t2) + \
+           (exp((sqrt(3) * (-2 + a + b)) / t) * (-6 * sqrt(3) * t + 6 * sqrt(3) * a * t + \
+           6 * sqrt(3) * b * t - 6 * sqrt(3) * a * b * t - 18 * t2 + 9 * a * t2 + \
+           9 * b * t2 - 5 * sqrt(3) * t3)) / (12. * t2) + \
+           (exp((sqrt(3) * (-a + b)) / t) * (6 * a2 * a - 18 * a2 * b + \
+           18 * a * b2 - 6 * b2 * b + 12 * sqrt(3) * a2 * t - 24 * sqrt(3) * a * b * t          \
+ + 12 * sqrt(3) * b2 * t + 21 * a * t2 - 21 * b * t2 + \
+           5 * sqrt(3) * t3)) / (12. * t2) + (exp((2 * sqrt(3) * b) / t - \
+           (sqrt(3) * (a + b)) / t) * (9 * a * t2 - 9 * b * t2 + \
+           5 * sqrt(3) * t3)) / (12. * t2));
     }
 
     template<>
@@ -154,26 +154,46 @@ namespace activegp {
             a = b;
             b = temp;
         }
-        double a2 = a*a, b2 = b*b, t2 = t*t;
-        return((-6*sqrt(3)*a*b*t - 3*a*t2 - 3*b*t2 - sqrt(3)*t2*t)/(4.*exp((sqrt(3)*(a + b))/t)*t2*t2) + (exp((sqrt(3)*(-2 + a + b))/t)*(-6*sqrt(3)*t + 6*sqrt(3)*a*t + 6*sqrt(3)*b*t - 6*sqrt(3)*a*b*t - 6*t2 + 3*a*t2 + 3*b*t2 - sqrt(3)*t2*t))/(4.*t2*t2) + (exp((2*sqrt(3)*b)/t - (sqrt(3)*(a + b))/t)*(3*a*t2 - 3*b*t2 + sqrt(3)*t2*t))/(4.*t2*t2) + (exp((sqrt(3)*(-a + b))/t)*(-6*a2*a + 18*a2*b - 18*a*b2 + 6*b2*b + 3*a*t2 - 3*b*t2 + sqrt(3)*t2*t))/(4.*t2*t2));
+        double a2 = a * a, b2 = b * b, t2 = t * t;
+        return ((-6 * sqrt(3) * a * b * t - 3 * a * t2 - 3 * b * t2 - sqrt(3) * t2 * t) /
+                (4. * exp((sqrt(3) * (a + b)) / t) * t2 * t2) + (exp((sqrt(3) * (-2 + a + b)) / t) *
+                                                                 (-6 * sqrt(3) * t + 6 * sqrt(3) * a * t +
+                                                                  6 * sqrt(3) * b * t - 6 * sqrt(3) * a * b * t -
+                                                                  6 * t2 + 3 * a * t2 + 3 * b * t2 -
+                                                                  sqrt(3) * t2 * t)) / (4. * t2 * t2) +
+                (exp((2 * sqrt(3) * b) / t - (sqrt(3) * (a + b)) / t) * (3 * a * t2 - 3 * b * t2 + sqrt(3) * t2 * t)) /
+                (4. * t2 * t2) + (exp((sqrt(3) * (-a + b)) / t) *
+                                  (-6 * a2 * a + 18 * a2 * b - 18 * a * b2 + 6 * b2 * b + 3 * a * t2 - 3 * b * t2 +
+                                   sqrt(3) * t2 * t)) / (4. * t2 * t2));
     }
 
     template<>
     inline double GpImpl<eCovTypes::matern_3_2>::w_ij(double const a, double const b, double const t) const {
-        double a2 = a*a, b2 = b*b, t2 = t*t, t3 = t2*t;
+        double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
         if (a > b) {
-            return((-6*a*b*t - 3*sqrt(3)*a*t2 - sqrt(3)*b*t2 - 2*t3)/(4.*exp((sqrt(3)*(a + b))/t)*t3) + (exp((sqrt(3)*(-a + b))/t)*(2*sqrt(3)*a2*a - 6*sqrt(3)*a2*b + 6*sqrt(3)*a*b2 - 2*sqrt(3)*b2*b + 6*a2*t - 12*a*b*t + 6*b2*t - sqrt(3)*a*t2 + sqrt(3)*b*t2 - 2*t3))/(4.*t3) + (exp((2*sqrt(3)*b)/t - (sqrt(3)*(a + b))/t)*(3*sqrt(3)*a*t2 - 3*sqrt(3)*b*t2 + 2*t3))/(4.*t3) + (exp((sqrt(3)*(-2 + a + b))/t)*(6*t - 6*a*t - 6*b*t + 6*a*b*t + 4*sqrt(3)*t2 - 3*sqrt(3)*a*t2 - sqrt(3)*b*t2 + 2*t3))/(4.*t3));
+            return ((-6 * a * b * t - 3 * sqrt(3) * a * t2 - sqrt(3) * b * t2 - 2 * t3) /
+                    (4. * exp((sqrt(3) * (a + b)) / t) * t3) + (exp((sqrt(3) * (-a + b)) / t) *
+                                                                (2 * sqrt(3) * a2 * a - 6 * sqrt(3) * a2 * b +
+                                                                 6 * sqrt(3) * a * b2 - 2 * sqrt(3) * b2 * b +
+                                                                 6 * a2 * t - 12 * a * b * t + 6 * b2 * t -
+                                                                 sqrt(3) * a * t2 + sqrt(3) * b * t2 - 2 * t3)) /
+                                                               (4. * t3) +
+                    (exp((2 * sqrt(3) * b) / t - (sqrt(3) * (a + b)) / t) *
+                     (3 * sqrt(3) * a * t2 - 3 * sqrt(3) * b * t2 + 2 * t3)) / (4. * t3) +
+                    (exp((sqrt(3) * (-2 + a + b)) / t) *
+                     (6 * t - 6 * a * t - 6 * b * t + 6 * a * b * t + 4 * sqrt(3) * t2 - 3 * sqrt(3) * a * t2 -
+                      sqrt(3) * b * t2 + 2 * t3)) / (4. * t3));
         } else {
-            return((exp((sqrt(3)*(a - b))/t)*(2*sqrt(3)*a2*a - 6*sqrt(3)*a2*b +                                 \
-             6*sqrt(3)*a*b2 - 2*sqrt(3)*b2*b - 6*a2*t + 12*a*b*t -                                        \
-             6*b2*t + 3*sqrt(3)*a*t2 - 3*sqrt(3)*b*t2 -                                                   \
-             2*t3))/(4.*t3) + (-6*a*b*t - 3*sqrt(3)*a*t2 -                                                \
-             sqrt(3)*b*t2 - 2*t3)/(4.*exp((sqrt(3)*(a +                                                   \
-             b))/t)*t3) + (exp((sqrt(3)*(-2 + a + b))/t)*(6*t - 6*a*t -                                   \
-             6*b*t + 6*a*b*t + 4*sqrt(3)*t2 - 3*sqrt(3)*a*t2 -                                            \
-             sqrt(3)*b*t2 + 2*t3))/(4.*t3) +                                                              \
-             (exp((2*sqrt(3)*a)/t - (sqrt(3)*(a + b))/t)*(-(sqrt(3)*a*t2) +                               \
-             sqrt(3)*b*t2 + 2*t3))/(4.*t3));
+            return ((exp((sqrt(3) * (a - b)) / t) * (2 * sqrt(3) * a2 * a - 6 * sqrt(3) * a2 * b + \
+             6 * sqrt(3) * a * b2 - 2 * sqrt(3) * b2 * b - 6 * a2 * t + 12 * a * b * t - \
+             6 * b2 * t + 3 * sqrt(3) * a * t2 - 3 * sqrt(3) * b * t2 - \
+             2 * t3)) / (4. * t3) + (-6 * a * b * t - 3 * sqrt(3) * a * t2 - \
+             sqrt(3) * b * t2 - 2 * t3) / (4. * exp((sqrt(3) * (a + \
+             b)) / t) * t3) + (exp((sqrt(3) * (-2 + a + b)) / t) * (6 * t - 6 * a * t - \
+             6 * b * t + 6 * a * b * t + 4 * sqrt(3) * t2 - 3 * sqrt(3) * a * t2 - \
+             sqrt(3) * b * t2 + 2 * t3)) / (4. * t3) + \
+             (exp((2 * sqrt(3) * a) / t - (sqrt(3) * (a + b)) / t) * (-(sqrt(3) * a * t2) + \
+             sqrt(3) * b * t2 + 2 * t3)) / (4. * t3));
         }
     }
 
@@ -258,19 +278,20 @@ namespace activegp {
     template<>
     inline double GpImpl<eCovTypes::matern_5_2>::w_ij(double const a, double const b, double const t) const {
         double a2 = a * a, b2 = b * b, t2 = t * t, t3 = t2 * t;
+        double const b_m_a = b - a;
         if (a > b) {
-            return ((10 * pow(a - b, 2) * exp((sqrt(5) * (-a + b)) / t) *
-                     (sqrt(5) * a2 * a - sqrt(5) * b2 * b + 10 * b2 * t - 9 * sqrt(5) * b * t2 + 9 * t3 +
+            return ((10. * std::pow(-b_m_a, 2.) * std::exp((std::sqrt(5.) * (b_m_a)) / t) *
+                     (std::sqrt(5.) * (a2 * a - b2 * b - 9. * b * t2) + 10 * b2 * t + 9. * t3 +
                       a2 * (-3 * sqrt(5) * b + 10 * t) + a * (3 * sqrt(5) * b2 - 20 * b * t + 9 * sqrt(5) * t2)) +
                      (3 * t * ((-50 * a2 * b2 - 40 * sqrt(5) * a2 * b * t - 20 * sqrt(5) * a * b2 * t - 50 * a2 * t2 -
                                 90 * a * b * t2 - 10 * b2 * t2 - 25 * sqrt(5) * a * t3 - 11 * sqrt(5) * b * t3 -
                                 18 * t2 * t2) * exp(-(sqrt(5) * (a + b)) / t) +
-                               exp(sqrt(5) * (b - a) / t) * t2 *
+                               exp(sqrt(5) * (b_m_a) / t) * t2 *
                                (50 * a2 + 50 * b2 + 25 * sqrt(5) * a * t + 18 * t2 - 25 * b * (4 * a + sqrt(5) * t)))) +
                      3 * t *
-                     (-(exp((sqrt(5) * (-a + b)) / t) * t2 * (10 * a2 - 20 * a * b + 10 * b2 + 11 * sqrt(5) * a * t
-                                                              - 11 * sqrt(5) * b * t + 18 * t2)) +
-                      exp((sqrt(5) * (-2 + a +
+                     (-(exp((sqrt(5.) * (b_m_a)) / t) * t2 * (10 * a2 - 20 * a * b + 10 * b2 + 11 * sqrt(5) * a * t
+                                                             - 11 * sqrt(5) * b * t + 18 * t2)) +
+                      exp((sqrt(5.) * (-2 + a +
                                       b)) / t) * (10 * b2 * (5 + 2 * sqrt(5) * t + t2) - b * (100 +
                                                                                               80 * sqrt(5) * t +
                                                                                               110 * t2 +
@@ -423,7 +444,7 @@ namespace activegp {
         auto &&ii = [&](uint16_t const i) {
             arma::Mat<double> wii_temp = w_kappa_ii(i);
             double const theta_squared = std::pow(theta_.at(i), 2.);
-            arma::Mat<double> m = - arma::accu(k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
+            arma::Mat<double> m = -arma::accu(k_inv_ % wii_temp) + (t_kir * (wii_temp * kir));
             m = (m_num_ / theta_squared) + m;
             matrix_.at(i, i) = m.at(0, 0);
             // wij_[i][i] = std::move(wii_temp);
