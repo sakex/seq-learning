@@ -10,11 +10,12 @@
     
 **Install dependencies**
 
-    pip3 install -r requirements.txt
+    pip3 install -r requirements.txt  # Ubuntu 20 -> pip install ...
     
-    sudo apt-get install -y wget curl python3 python3-pip wget \
-         libboost-python-dev libboost-dev build-essential zlib1g-dev \
-         libboost-system-dev libboost-program-options-dev libarmadillo-dev libboost-numpy-dev
+    sudo apt-get update -y
+    
+    sudo apt-get install -y -y wget curl python3 python3-pip wget libboost-python-dev libboost-dev build-essential zlib1g-dev \
+                            libboost-system-dev libboost-program-options-dev libarmadillo-dev libboost-numpy-dev gcc g++ cmake
          
 # Build
 
@@ -25,6 +26,12 @@
 # Run tests
 
     python -m unittest tests.py
+    
+# With docker
+
+    docker build . --file tests.Dockerfile --tag seqlearning
+    
+    docker run seqlearning # Runs the tests
 
 
 # Build original R package (Linux)
