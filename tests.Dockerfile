@@ -17,7 +17,7 @@ libboost-system-dev libboost-program-options-dev libarmadillo-dev libboost-numpy
 WORKDIR /seq-learning/
 COPY . /seq-learning/
 
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 WORKDIR /seq-learning/Debug/
 RUN rm -rf *
