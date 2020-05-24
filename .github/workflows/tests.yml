@@ -13,7 +13,7 @@ jobs:
       with:
           image_tag: latest
           context: .
-          dockerfile: tests.Dockerfile
+          dockerfile: /tests.Dockerfile
           push_image_and_stages: true
           push_git_tag: false
           pull_image_and_stages: true
