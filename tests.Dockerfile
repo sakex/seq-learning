@@ -9,13 +9,10 @@ libboost-system-dev libboost-program-options-dev libarmadillo-dev libboost-numpy
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 1 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
 
 # Install CMAKE
-RUN wget http://www.cmake.org/files/v3.14/cmake-3.14.4.tar.gz
-RUN tar -xvzf cmake-3.14.4.tar.gz
-WORKDIR cmake-3.14.4/
-RUN ./configure
-RUN make -j$(nproc)
-RUN make install
-RUN update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
+RUN apt-get install software-properties-common
+RUN add-apt-repository ppa:george-edison55/cmake-3.x
+RUN apt-get update
+RUN apt-get install cmake
 
 WORKDIR /seq-learning/
 COPY . /seq-learning/
